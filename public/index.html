@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Movie Recommender</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: #8892b0;
+      font-size: 1.1rem;
+    }
+
+    .search-box {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .search-input-wrapper {
+      display: flex;
+      gap: 12px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 16px 20px;
+      font-size: 1rem;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #e94560;
+    }
+
+    input[type="text"]::placeholder {
+      color: #8892b0;
+    }
+
+    button {
+      padding: 16px 32px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(233, 69, 96, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .examples {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .example-chip {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .example-chip:hover {
+      background: rgba(233, 69, 96, 0.3);
+    }
+
+    .results {
+      display: grid;
+      gap: 20px;
+    }
+
+    .movie-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .movie-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(233, 69, 96, 0.5);
+    }
+
+    .movie-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .movie-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .similarity-badge {
+      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .movie-meta {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 12px;
+      color: #8892b0;
+      font-size: 0.9rem;
+    }
+
+    .movie-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .movie-description {
+      color: #ccd6f6;
+      line-height: 1.6;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #8892b0;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #e94560;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      padding: 16px;
+      border-radius: 12px;
+      color: #ff6b6b;
+      text-align: center;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #8892b0;
+    }
+
+    .empty-state svg {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: #8892b0;
+    }
+
+    footer a {
+      color: #e94560;
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      .search-input-wrapper {
+        flex-direction: column;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎬 AI Movie Recommender</h1>
+      <p class="subtitle">Describe what you want to watch. AI finds the perfect match.</p>
+    </header>
+
+    <div class="search-box">
+      <div class="search-input-wrapper">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="e.g., mind-bending sci-fi with plot twists"
+          autofocus
+        >
+        <button id="searchBtn" onclick="search()">Search</button>
+      </div>
+      <div class="examples">
+        <span class="example-chip" onclick="setQuery('mind bending sci-fi with dreams')">🌀 Mind-bending</span>
+        <span class="example-chip" onclick="setQuery('emotional drama about friendship')">😢 Emotional</span>
+        <span class="example-chip" onclick="setQuery('scary psychological horror')">👻 Horror</span>
+        <span class="example-chip" onclick="setQuery('action with car chases')">🚗 Action</span>
+        <span class="example-chip" onclick="setQuery('romantic love story')">❤️ Romance</span>
+        <span class="example-chip" onclick="setQuery('animated fantasy adventure')">✨ Animated</span>
+      </div>
+    </div>
+
+    <div id="results" class="results">
+      <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+        </svg>
+        <p>Describe the kind of movie you're looking for</p>
+      </div>
+    </div>
+
+    <footer>
+      <p>Powered by <a href="https://github.com/pgvector/pgvector">pgvector</a> & <a href="https://voyageai.com">Voyage AI</a></p>
+      <p style="margin-top: 8px;">
+        <a href="/api/v1/docs">API Docs</a> ·
+        <a href="https://github.com/yourusername/movie-recommender">GitHub</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    const input = document.getElementById('searchInput');
+    const btn = document.getElementById('searchBtn');
+    const resultsDiv = document.getElementById('results');
+
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') search();
+    });
+
+    function setQuery(query) {
+      input.value = query;
+      search();
+    }
+
+    async function search() {
+      const query = input.value.trim();
+      if (!query) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Searching...';
+      resultsDiv.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Finding movies that match "${query}"...</p>
+        </div>
+      `;
+
+      try {
+        const res = await fetch(`/api/v1/movies/recommend?q=${encodeURIComponent(query)}&limit=5`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error?.message || 'Failed to fetch recommendations');
+        }
+
+        if (data.data.length === 0) {
+          resultsDiv.innerHTML = `
+            <div class="empty-state">
+              <p>No movies found matching your query. Try a different description!</p>
+            </div>
+          `;
+          return;
+        }
+
+        resultsDiv.innerHTML = data.data.map(movie => `
+          <div class="movie-card">
+            <div class="movie-header">
+              <span class="movie-title">${movie.title}</span>
+              <span class="similarity-badge">${(movie.similarity * 100).toFixed(1)}% match</span>
+            </div>
+            <div class="movie-meta">
+              <span>📅 ${movie.year}</span>
+              <span>🎭 ${movie.genre}</span>
+              <span>🎬 ${movie.director}</span>
+            </div>
+            <p class="movie-description">${movie.description}</p>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        resultsDiv.innerHTML = `
+          <div class="error">
+            <p>❌ ${err.message}</p>
+          </div>
+        `;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Search';
+      }
+    }
+  </script>
+</body>
+</html>

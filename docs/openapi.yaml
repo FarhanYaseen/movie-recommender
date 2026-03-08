@@ -1,0 +1,285 @@
+openapi: 3.0.3
+info:
+  title: Movie Recommender API
+  description: Semantic movie recommendation engine using pgvector and Voyage AI embeddings
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development
+  - url: http://localhost:3000
+    description: Legacy endpoints
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Movies
+    description: Movie operations and recommendations
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Returns overall health status including database connectivity
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: Service is degraded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /health/live:
+    get:
+      tags:
+        - Health
+      summary: Liveness probe
+      description: Simple liveness check for Kubernetes
+      responses:
+        "200":
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /health/ready:
+    get:
+      tags:
+        - Health
+      summary: Readiness probe
+      description: Readiness check including database connectivity
+      responses:
+        "200":
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ready
+        "503":
+          description: Service is not ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: not ready
+
+  /movies:
+    get:
+      tags:
+        - Movies
+      summary: List all movies
+      description: Returns all movies in the database without embeddings
+      responses:
+        "200":
+          description: List of movies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieListResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /movies/{id}:
+    get:
+      tags:
+        - Movies
+      summary: Get movie by ID
+      description: Returns a single movie by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Movie ID
+          example: 1
+      responses:
+        "200":
+          description: Movie found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SingleMovieResponse"
+        "400":
+          description: Invalid movie ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Movie not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /movies/recommend:
+    get:
+      tags:
+        - Movies
+      summary: Get movie recommendations
+      description: Returns semantically similar movies based on a natural language query
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query in natural language
+          example: mind bending sci-fi with plot twists
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 5
+          description: Number of recommendations to return
+          example: 5
+      responses:
+        "200":
+          description: Recommendations found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationResponse"
+        "400":
+          description: Missing or invalid query parameter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    Movie:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Inception
+        genre:
+          type: string
+          example: Sci-Fi / Thriller
+        year:
+          type: integer
+          example: 2010
+        director:
+          type: string
+          example: Christopher Nolan
+        description:
+          type: string
+          example: A thief who steals corporate secrets through dream-sharing technology...
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    MovieWithSimilarity:
+      allOf:
+        - $ref: "#/components/schemas/Movie"
+        - type: object
+          properties:
+            similarity:
+              type: string
+              description: Cosine similarity score (0-1, higher is more similar)
+              example: "0.8712"
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+          example: ok
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        services:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: [connected, disconnected]
+              example: connected
+
+    MovieListResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 15
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Movie"
+
+    SingleMovieResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/Movie"
+
+    RecommendationResponse:
+      type: object
+      properties:
+        query:
+          type: string
+          example: mind bending sci-fi
+        count:
+          type: integer
+          example: 5
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MovieWithSimilarity"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: Query parameter 'q' is required

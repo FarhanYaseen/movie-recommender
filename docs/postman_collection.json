@@ -1,0 +1,262 @@
+{
+  "info": {
+    "name": "Movie Recommender API",
+    "description": "Semantic movie recommendation engine using pgvector and Voyage AI embeddings",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "apiVersion",
+      "value": "api/v1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{apiVersion}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiVersion}}", "health"]
+            },
+            "description": "Returns overall health status including database connectivity"
+          },
+          "response": []
+        },
+        {
+          "name": "Liveness Probe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{apiVersion}}/health/live",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiVersion}}", "health", "live"]
+            },
+            "description": "Simple liveness check for Kubernetes"
+          },
+          "response": []
+        },
+        {
+          "name": "Readiness Probe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{apiVersion}}/health/ready",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiVersion}}", "health", "ready"]
+            },
+            "description": "Readiness check including database connectivity"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "List All Movies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{apiVersion}}/movies",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiVersion}}", "movies"]
+            },
+            "description": "Returns all movies in the database"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Movie by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{apiVersion}}/movies/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiVersion}}", "movies", "1"]
+            },
+            "description": "Returns a single movie by its ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{apiVersion}}/movies/recommend?q=mind bending sci-fi with plot twists&limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiVersion}}", "movies", "recommend"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "mind bending sci-fi with plot twists",
+                  "description": "Natural language search query"
+                },
+                {
+                  "key": "limit",
+                  "value": "5",
+                  "description": "Number of results (1-50, default: 5)"
+                }
+              ]
+            },
+            "description": "Returns semantically similar movies based on a natural language query"
+          },
+          "response": []
+        },
+        {
+          "name": "Recommend: Action Movies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{apiVersion}}/movies/recommend?q=intense action with car chases&limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiVersion}}", "movies", "recommend"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "intense action with car chases"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Recommend: Emotional Drama",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{apiVersion}}/movies/recommend?q=emotional drama about friendship&limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiVersion}}", "movies", "recommend"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "emotional drama about friendship"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Recommend: Horror",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{apiVersion}}/movies/recommend?q=scary horror with psychological terror&limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiVersion}}", "movies", "recommend"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "scary horror with psychological terror"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Recommend: Romance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{apiVersion}}/movies/recommend?q=romantic love story with bittersweet ending&limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiVersion}}", "movies", "recommend"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "romantic love story with bittersweet ending"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Legacy Endpoints",
+      "item": [
+        {
+          "name": "[Legacy] Recommend",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recommend?q=space exploration&limit=3",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommend"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "space exploration"
+                },
+                {
+                  "key": "limit",
+                  "value": "3"
+                }
+              ]
+            },
+            "description": "Legacy endpoint (use /api/v1/movies/recommend instead)"
+          },
+          "response": []
+        },
+        {
+          "name": "[Legacy] Movies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies"]
+            },
+            "description": "Legacy endpoint (use /api/v1/movies instead)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
