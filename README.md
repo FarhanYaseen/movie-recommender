@@ -196,7 +196,7 @@ MIT — see [LICENSE](LICENSE)
 
 ## Author
 
-**Your Name**
+**Farhan Yaseen**
 [Portfolio](https://farhanyaseen.netlify.app/) · [LinkedIn](https://linkedin.com/in/Farhanyaseen) · farhan.yaseen.se@gmail.com
 
 ---
