@@ -1,23 +1,16 @@
 # Demo Assets
 
-Place your demo assets here:
+Add a `demo.gif` here showing the app in action.
 
-## Required
-- `demo.gif` - Screen recording of the app in action (recommended: 800x600, <5MB)
+## Recording tips
 
-## How to create demo.gif
+1. Use a screen recorder (QuickTime on Mac, OBS, or gifcap.dev)
+2. Show 2-3 different searches
+3. Keep it under 30 seconds
+4. Aim for 800x600 resolution
 
-### macOS
-1. Use QuickTime Player to record your screen
-2. Convert to GIF using: `ffmpeg -i demo.mov -vf "fps=10,scale=800:-1" demo.gif`
+## Converting to GIF (Mac)
 
-### Or use online tools
-- [Gifcap](https://gifcap.dev/) - Browser-based screen recorder
-- [Kap](https://getkap.co/) - macOS app
-
-## Tips for a good demo
-1. Start with the search box empty
-2. Type a query like "mind bending sci-fi"
-3. Show the results loading and displaying
-4. Try 2-3 different queries
-5. Keep it under 30 seconds
+```bash
+ffmpeg -i recording.mov -vf "fps=10,scale=800:-1" demo.gif
+```

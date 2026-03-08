@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Movie Recommender</title>
+  <title>Movie Recommender</title>
   <style>
     * {
       margin: 0;
@@ -32,9 +32,7 @@
     h1 {
       font-size: 2.5rem;
       margin-bottom: 10px;
-      background: linear-gradient(90deg, #e94560, #ff6b6b);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #fff;
     }
 
     .subtitle {
@@ -82,7 +80,7 @@
       font-weight: 600;
       border: none;
       border-radius: 12px;
-      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      background: #e94560;
       color: #fff;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
@@ -151,7 +149,7 @@
     }
 
     .similarity-badge {
-      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      background: #e94560;
       padding: 6px 12px;
       border-radius: 20px;
       font-size: 0.85rem;
@@ -164,12 +162,6 @@
       margin-bottom: 12px;
       color: #8892b0;
       font-size: 0.9rem;
-    }
-
-    .movie-meta span {
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
 
     .movie-description {
@@ -212,19 +204,13 @@
       color: #8892b0;
     }
 
-    .empty-state svg {
-      width: 80px;
-      height: 80px;
-      margin-bottom: 20px;
-      opacity: 0.5;
-    }
-
     footer {
       text-align: center;
       margin-top: 60px;
       padding-top: 30px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
       color: #8892b0;
+      font-size: 0.9rem;
     }
 
     footer a {
@@ -246,8 +232,8 @@
 <body>
   <div class="container">
     <header>
-      <h1>🎬 AI Movie Recommender</h1>
-      <p class="subtitle">Describe what you want to watch. AI finds the perfect match.</p>
+      <h1>Movie Recommender</h1>
+      <p class="subtitle">Describe what you want to watch</p>
     </header>
 
     <div class="search-box">
@@ -255,35 +241,31 @@
         <input
           type="text"
           id="searchInput"
-          placeholder="e.g., mind-bending sci-fi with plot twists"
+          placeholder="e.g., psychological thriller with plot twists"
           autofocus
         >
         <button id="searchBtn" onclick="search()">Search</button>
       </div>
       <div class="examples">
-        <span class="example-chip" onclick="setQuery('mind bending sci-fi with dreams')">🌀 Mind-bending</span>
-        <span class="example-chip" onclick="setQuery('emotional drama about friendship')">😢 Emotional</span>
-        <span class="example-chip" onclick="setQuery('scary psychological horror')">👻 Horror</span>
-        <span class="example-chip" onclick="setQuery('action with car chases')">🚗 Action</span>
-        <span class="example-chip" onclick="setQuery('romantic love story')">❤️ Romance</span>
-        <span class="example-chip" onclick="setQuery('animated fantasy adventure')">✨ Animated</span>
+        <span class="example-chip" onclick="setQuery('mind bending sci-fi')">Mind-bending</span>
+        <span class="example-chip" onclick="setQuery('emotional drama about friendship')">Emotional drama</span>
+        <span class="example-chip" onclick="setQuery('scary psychological horror')">Horror</span>
+        <span class="example-chip" onclick="setQuery('fast paced action')">Action</span>
+        <span class="example-chip" onclick="setQuery('romantic love story')">Romance</span>
+        <span class="example-chip" onclick="setQuery('animated fantasy')">Animated</span>
       </div>
     </div>
 
     <div id="results" class="results">
       <div class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
-        </svg>
-        <p>Describe the kind of movie you're looking for</p>
+        <p>Enter a description to find matching movies</p>
       </div>
     </div>
 
     <footer>
-      <p>Powered by <a href="https://github.com/pgvector/pgvector">pgvector</a> & <a href="https://voyageai.com">Voyage AI</a></p>
+      <p>Built with pgvector and Voyage AI</p>
       <p style="margin-top: 8px;">
-        <a href="/api/v1/docs">API Docs</a> ·
-        <a href="https://github.com/yourusername/movie-recommender">GitHub</a>
+        <a href="/api/v1/docs">API Docs</a>
       </p>
     </footer>
   </div>
@@ -311,7 +293,7 @@
       resultsDiv.innerHTML = `
         <div class="loading">
           <div class="spinner"></div>
-          <p>Finding movies that match "${query}"...</p>
+          <p>Searching...</p>
         </div>
       `;
 
@@ -320,13 +302,13 @@
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.error?.message || 'Failed to fetch recommendations');
+          throw new Error(data.error?.message || 'Search failed');
         }
 
         if (data.data.length === 0) {
           resultsDiv.innerHTML = `
             <div class="empty-state">
-              <p>No movies found matching your query. Try a different description!</p>
+              <p>No matches found. Try a different description.</p>
             </div>
           `;
           return;
@@ -336,12 +318,12 @@
           <div class="movie-card">
             <div class="movie-header">
               <span class="movie-title">${movie.title}</span>
-              <span class="similarity-badge">${(movie.similarity * 100).toFixed(1)}% match</span>
+              <span class="similarity-badge">${(movie.similarity * 100).toFixed(0)}% match</span>
             </div>
             <div class="movie-meta">
-              <span>📅 ${movie.year}</span>
-              <span>🎭 ${movie.genre}</span>
-              <span>🎬 ${movie.director}</span>
+              <span>${movie.year}</span>
+              <span>${movie.genre}</span>
+              <span>${movie.director}</span>
             </div>
             <p class="movie-description">${movie.description}</p>
           </div>
@@ -350,7 +332,7 @@
       } catch (err) {
         resultsDiv.innerHTML = `
           <div class="error">
-            <p>❌ ${err.message}</p>
+            <p>${err.message}</p>
           </div>
         `;
       } finally {

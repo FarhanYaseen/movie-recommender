@@ -1,129 +1,87 @@
-# 🎬 AI Movie Recommender
+# Movie Recommender API
+
+A semantic search engine for movies using vector embeddings. Instead of matching keywords, it understands what you're looking for — search for "films about dreams and reality" and it finds Inception, even though those words aren't in its description.
+
+Built with Node.js, PostgreSQL, pgvector, and Voyage AI.
 
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-blue.svg)](https://postgresql.org/)
-[![pgvector](https://img.shields.io/badge/pgvector-0.5+-purple.svg)](https://github.com/pgvector/pgvector)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Semantic movie recommendation engine** powered by AI embeddings and vector similarity search. Find movies based on natural language descriptions, not just keywords.
+---
 
-![Demo](docs/assets/demo.gif)
+## What it does
+
+- **Semantic search** — Understands meaning, not just keywords
+- **Vector similarity** — Uses cosine distance for accurate matching
+- **Fast queries** — HNSW indexing keeps searches under 10ms
+- **Production ready** — Health checks, graceful shutdown, structured logging
+- **Well documented** — OpenAPI spec, Postman collection, interactive docs
 
 ---
 
-## ✨ Features
+## Tech stack
 
-| Feature | Description |
-|---------|-------------|
-| 🧠 **Semantic Search** | Understands meaning, not just keywords. "films about dreams" finds Inception |
-| ⚡ **Fast Vector Search** | HNSW indexing for millisecond queries on millions of records |
-| 🔌 **REST API** | Clean, versioned API with Swagger documentation |
-| 🐳 **Docker Ready** | One-command deployment with Docker Compose |
-| 📊 **Production Grade** | Health checks, graceful shutdown, structured logging |
-| 📚 **Well Documented** | OpenAPI spec, Postman collection, inline comments |
-
----
-
-## 🎯 Use Cases
-
-- **Streaming Platforms** — "Show me something like Black Mirror but funnier"
-- **Movie Discovery Apps** — Natural language movie search
-- **Content Recommendation** — Find similar content based on descriptions
-- **E-commerce** — Adapt for product recommendations
-- **Knowledge Bases** — Semantic document search
+| Component | Technology |
+|-----------|------------|
+| API Server | Node.js, Express |
+| Database | PostgreSQL with pgvector |
+| Embeddings | Voyage AI (voyage-3 model) |
+| Documentation | Swagger UI, OpenAPI 3.0 |
+| Deployment | Docker, Docker Compose |
 
 ---
 
-## 🛠️ Tech Stack
+## Quick start
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      Architecture                           │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│   Client Request                                            │
-│        │                                                    │
-│        ▼                                                    │
-│   ┌─────────┐    ┌──────────┐    ┌─────────────────────┐   │
-│   │ Express │───▶│ Voyage   │───▶│ PostgreSQL          │   │
-│   │ API     │    │ AI API   │    │ + pgvector          │   │
-│   └─────────┘    └──────────┘    └─────────────────────┘   │
-│        │              │                    │                │
-│        │         Embeddings          Vector Search          │
-│        │         (1024-dim)          (Cosine Distance)      │
-│        ▼                                   │                │
-│   JSON Response ◀──────────────────────────┘                │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-| Technology | Purpose |
-|------------|---------|
-| **Node.js + Express** | REST API server |
-| **PostgreSQL + pgvector** | Vector database for similarity search |
-| **Voyage AI** | State-of-the-art text embeddings |
-| **Docker** | Containerized deployment |
-| **Swagger UI** | Interactive API documentation |
-
----
-
-## 🚀 Quick Start
-
-### Option 1: Docker (Recommended)
+### Using Docker
 
 ```bash
-# Clone the repository
 git clone https://github.com/yourusername/movie-recommender.git
 cd movie-recommender
 
-# Set your API key
-echo "VOYAGE_API_KEY=your_key_here" > .env
+# Add your API key
+echo "VOYAGE_API_KEY=your_key" > .env
 
-# Start everything
+# Start the stack
 docker compose up -d
 
-# Seed the database (wait ~5 min for rate limits)
+# Seed the database
 docker compose exec app node src/scripts/seed.js
 
-# Try it out
-curl "http://localhost:3000/api/v1/movies/recommend?q=mind+bending+sci-fi"
+# Test it
+curl "http://localhost:3000/api/v1/movies/recommend?q=psychological+thriller"
 ```
 
-### Option 2: Local Development
+### Local development
 
 ```bash
-# Prerequisites: Node.js 18+, PostgreSQL 16+ with pgvector
-
-# Install dependencies
 npm install
-
-# Configure environment
 cp .env.example .env
 # Edit .env with your credentials
 
-# Start the server
 npm run dev
 
-# Seed movies (in another terminal)
+# In another terminal
 npm run seed
 ```
 
 ---
 
-## 📡 API Endpoints
+## API
 
-### Get Recommendations
+### Get recommendations
 
-```bash
+```
 GET /api/v1/movies/recommend?q=<query>&limit=<n>
 ```
 
-**Example:**
+Example:
 ```bash
-curl "http://localhost:3000/api/v1/movies/recommend?q=emotional%20story%20about%20time&limit=3"
+curl "http://localhost:3000/api/v1/movies/recommend?q=emotional+story+about+time"
 ```
 
-**Response:**
+Response:
 ```json
 {
   "query": "emotional story about time",
@@ -135,39 +93,34 @@ curl "http://localhost:3000/api/v1/movies/recommend?q=emotional%20story%20about%
       "genre": "Sci-Fi / Drama",
       "year": 2014,
       "director": "Christopher Nolan",
-      "description": "A team of astronauts travels through a wormhole...",
       "similarity": "0.8234"
     }
   ]
 }
 ```
 
-### All Endpoints
+### Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/v1/movies/recommend?q=...` | Semantic movie search |
-| `GET` | `/api/v1/movies` | List all movies |
-| `GET` | `/api/v1/movies/:id` | Get movie by ID |
-| `GET` | `/api/v1/health` | Health check |
-| `GET` | `/api/v1/docs` | Swagger UI |
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/movies/recommend` | Semantic search |
+| GET | `/api/v1/movies` | List all movies |
+| GET | `/api/v1/movies/:id` | Get single movie |
+| GET | `/api/v1/health` | Health check |
+| GET | `/api/v1/docs` | Swagger UI |
 
 ---
 
-## 🔍 How It Works
+## How it works
 
-### 1. Text → Embedding
-```
-"mind-bending sci-fi" → [0.12, -0.87, 0.34, ...] (1024 floats)
-```
+The system converts text into 1024-dimensional vectors using Voyage AI's embedding model. Similar concepts end up close together in this vector space.
 
-### 2. Store in pgvector
-```sql
-INSERT INTO movies (title, description, embedding)
-VALUES ('Inception', '...', '[0.12, -0.87, ...]');
+```
+"mind-bending sci-fi" → [0.12, -0.87, 0.34, ...]
 ```
 
-### 3. Similarity Search
+When you search, your query gets converted to a vector too. PostgreSQL with pgvector then finds the movies with the smallest cosine distance to your query — that's your recommendation list.
+
 ```sql
 SELECT title, 1 - (embedding <=> query_vector) AS similarity
 FROM movies
@@ -175,165 +128,79 @@ ORDER BY embedding <=> query_vector
 LIMIT 5;
 ```
 
-### 4. Return Results
-Movies ranked by semantic similarity (0-1 score).
+The `<=>` operator calculates cosine distance. Lower distance means higher similarity.
 
 ---
 
-## 📁 Project Structure
+## Project structure
 
 ```
-movie-recommender/
-├── src/
-│   ├── config/
-│   │   ├── index.js          # Environment configuration
-│   │   └── database.js       # PostgreSQL + pgvector setup
-│   ├── middleware/
-│   │   ├── errorHandler.js   # Global error handling
-│   │   └── requestLogger.js  # HTTP request logging
-│   ├── routes/
-│   │   ├── index.js          # Route aggregator
-│   │   ├── health.js         # Health check endpoints
-│   │   ├── movies.js         # Movie CRUD + recommendations
-│   │   └── docs.js           # Swagger UI
-│   ├── services/
-│   │   ├── embedding.js      # Voyage AI integration
-│   │   └── movies.js         # Business logic
-│   ├── scripts/
-│   │   └── seed.js           # Database seeding
-│   ├── app.js                # Express app factory
-│   └── index.js              # Entry point
-├── docs/
-│   ├── openapi.yaml          # OpenAPI 3.0 specification
-│   └── postman_collection.json
-├── Dockerfile
-├── docker-compose.yml
-└── package.json
+src/
+├── config/           # Environment and database setup
+├── middleware/       # Error handling, request logging
+├── routes/           # API endpoints
+├── services/         # Business logic, embedding calls
+└── scripts/          # Database seeding
+
+docs/
+├── openapi.yaml      # API specification
+└── postman_collection.json
+
+public/
+└── index.html        # Demo frontend
 ```
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `PORT` | Server port | `3000` |
-| `NODE_ENV` | Environment | `development` |
-| `VOYAGE_API_KEY` | Voyage AI API key | Required |
-| `DB_HOST` | PostgreSQL host | `localhost` |
-| `DB_PORT` | PostgreSQL port | `5432` |
-| `DB_NAME` | Database name | `movie_recommender` |
-| `DB_USER` | Database user | `postgres` |
-| `DB_PASSWORD` | Database password | Required |
+| PORT | Server port | 3000 |
+| NODE_ENV | Environment | development |
+| VOYAGE_API_KEY | Voyage AI key | required |
+| DB_HOST | PostgreSQL host | localhost |
+| DB_PORT | PostgreSQL port | 5432 |
+| DB_NAME | Database name | movie_recommender |
+| DB_USER | Database user | postgres |
+| DB_PASSWORD | Database password | required |
 
 ---
 
-## 🧪 Testing the API
-
-### Using cURL
+## Deployment
 
 ```bash
-# Health check
-curl http://localhost:3000/api/v1/health
-
-# Get recommendations
-curl "http://localhost:3000/api/v1/movies/recommend?q=scary+horror+movie"
-
-# List all movies
-curl http://localhost:3000/api/v1/movies
-```
-
-### Using Postman
-
-1. Import `docs/postman_collection.json`
-2. Set `baseUrl` variable to `http://localhost:3000`
-3. Run requests from the collection
-
-### Using Swagger UI
-
-Open http://localhost:3000/api/v1/docs in your browser.
-
----
-
-## 🚢 Deployment
-
-### Docker Production
-
-```bash
-# Build and run
-docker compose -f docker-compose.yml up -d --build
-
-# View logs
+docker compose up -d --build
 docker compose logs -f app
 ```
 
-### Environment Variables for Production
-
-```bash
-NODE_ENV=production
-PORT=3000
-VOYAGE_API_KEY=your_production_key
-DB_HOST=your_db_host
-DB_PASSWORD=strong_password_here
-```
+For production, set `NODE_ENV=production` and use strong passwords.
 
 ---
 
-## 📈 Performance
+## Performance
 
 | Metric | Value |
 |--------|-------|
-| Query latency | ~200ms (with embedding) |
-| Vector search | <10ms (HNSW index) |
-| Concurrent users | 100+ (connection pooling) |
+| Query latency | ~200ms (includes embedding API call) |
+| Vector search | <10ms |
 | Embedding dimensions | 1024 |
 
 ---
 
-## 🔮 Roadmap
+## License
 
-- [ ] Add user ratings and collaborative filtering
-- [ ] Implement caching for embeddings
-- [ ] Add batch embedding for faster seeding
-- [ ] Create React/Vue frontend
-- [ ] Add authentication (JWT)
-- [ ] Deploy to AWS/GCP/Azure
+MIT — see [LICENSE](LICENSE)
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 👨‍💻 Author
+## Author
 
 **Your Name**
-- Portfolio: [yourportfolio.com](https://yourportfolio.com)
-- LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
-- Email: your.email@example.com
+[Portfolio](https://farhanyaseen.netlify.app/) · [LinkedIn](https://linkedin.com/in/Farhanyaseen) · farhan.yaseen.se@gmail.com
 
 ---
 
-## 💼 Hire Me
+## Looking for similar work?
 
-Looking for a developer to build:
-- **Recommendation Systems** — Products, content, music, articles
-- **Semantic Search** — Natural language search for your data
-- **AI-Powered APIs** — Integrate LLMs and embeddings into your product
-- **Vector Databases** — pgvector, Pinecone, Weaviate, Qdrant
-
-📧 **Contact:** your.email@example.com
-
----
-
-<p align="center">
-  <b>⭐ Star this repo if you found it useful!</b>
-</p>
+I build recommendation systems, semantic search, and AI-powered APIs. If you need help with vector databases (pgvector, Pinecone, Weaviate) or embedding integrations, get in touch.
