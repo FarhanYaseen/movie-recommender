@@ -39,8 +39,13 @@ Branch: `feat/ai-rag-app` · Brief baseline: `596c93b` · Date: 2026-10-08
 
 ## Open items
 
-1. **Anthropic credits** — required for any live generation (legacy `/ask`, chat RAG and
-   agent modes). Everything up to the provider call is verified.
+1. ~~Anthropic credits~~ **Resolved 2026-10-08**: the original `.env` key belonged to
+   an unfunded org; swapped for a key from the funded org. Live generation then verified
+   end to end: legacy `/ask` SSE streamed a grounded answer recommending only movies in
+   its `sources`; RAG chat streamed 62 deltas with inline [S#] markers, a `citations`
+   event of authorized chunks only, and `done(complete)`; agent mode made real tool
+   calls (`search_catalog` → `search_documents`), stayed within round limits, and
+   produced a correct cited answer joining catalog and user-document knowledge.
 2. ~~Embedding-failure mapping bug~~ **Fixed**: the live failure was a transient DNS
    `httpx.ConnectError` escaping the Voyage client uncaught. Network errors are now
    retried like timeouts and exhaust to 502 `UPSTREAM_ERROR`; covered by

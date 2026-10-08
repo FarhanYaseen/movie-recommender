@@ -32,9 +32,10 @@ API credits (see `docs/verification/final-report.md`).
 7. **Stop/cancel:** start a question and press Stop mid-stream. Expect the cancelled
    state, and a retry that does not duplicate messages.
 
-## Evidence captured without credits (2026-10-08)
+## Evidence captured (2026-10-08)
 
-Steps 1, 2, 6 ran live end-to-end. Step 3 ran live through retrieval (correct document
-ranked first) and then failed safely at the provider call (`error` + `done(failed)`
-events) because the API account had no credits — the UI's failed state is the expected
-rendering for that. Steps 4, 5, 7 are covered by mocked backend/frontend tests.
+Steps 1, 2, 3, 5, and 6 ran live end-to-end (step 3 via the API: streamed grounded
+answer with citations to the correct document; step 5 via the API: real
+`search_catalog` + `search_documents` tool calls with a cited synthesis). Steps 4 and 7
+are covered by mocked backend/frontend tests. The checklist above remains the script
+for a browser-recorded demo.
