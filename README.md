@@ -201,6 +201,23 @@ public/
 
 ---
 
+## Evaluation
+
+```bash
+npm run evals
+```
+
+Retrieval quality is measured against golden queries: natural-language searches with known correct answers from the catalog (`evals/golden-queries.json`). For each query the harness checks **hit@k** — whether an expected title appears in the top k results. hit@1 means the best match came first; hit@5 means it at least made the list. The run fails (non-zero exit) if hit@5 drops below 0.8, so it can gate CI.
+
+Current scores on the seed catalog:
+
+```
+[evals] hit@1: 1.00  hit@3: 1.00  hit@5: 1.00  mean top similarity: 0.6159  (15 queries)
+[evals] PASS: hit@5 1.00 >= threshold 0.8
+```
+
+---
+
 ## Configuration
 
 | Variable | Description | Default |

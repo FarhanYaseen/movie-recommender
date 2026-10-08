@@ -1,0 +1,62 @@
+[
+  {
+    "query": "dream heist thriller",
+    "expected": ["Inception"]
+  },
+  {
+    "query": "reality is a computer simulation",
+    "expected": ["The Matrix"]
+  },
+  {
+    "query": "astronauts travel through a wormhole to save humanity",
+    "expected": ["Interstellar"]
+  },
+  {
+    "query": "wrongly convicted banker finds hope in prison",
+    "expected": ["The Shawshank Redemption"]
+  },
+  {
+    "query": "poor family schemes its way into a wealthy household",
+    "expected": ["Parasite"]
+  },
+  {
+    "query": "a nihilistic criminal plunges a city into chaos",
+    "expected": ["The Dark Knight"]
+  },
+  {
+    "query": "girl trapped in a spirit world working in a magical bathhouse",
+    "expected": ["Spirited Away"]
+  },
+  {
+    "query": "social horror film about racism in America",
+    "expected": ["Get Out"]
+  },
+  {
+    "query": "couple erases their memories of each other after a breakup",
+    "expected": ["Eternal Sunshine of the Spotless Mind"]
+  },
+  {
+    "query": "post-apocalyptic desert car chase",
+    "expected": ["Mad Max: Fury Road"]
+  },
+  {
+    "query": "slow-burn occult horror rooted in family grief",
+    "expected": ["Hereditary"]
+  },
+  {
+    "query": "lonely man falls in love with an artificial intelligence",
+    "expected": ["Her"]
+  },
+  {
+    "query": "young drummer pushed to the brink by a ruthless teacher",
+    "expected": ["Whiplash"]
+  },
+  {
+    "query": "linguist tries to communicate with aliens",
+    "expected": ["Arrival"]
+  },
+  {
+    "query": "mind-bending story about memory and identity",
+    "expected": ["Eternal Sunshine of the Spotless Mind", "Inception", "The Matrix"]
+  }
+]
