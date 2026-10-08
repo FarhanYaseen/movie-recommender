@@ -14,10 +14,11 @@ router.use("/movies", movieRoutes);
 router.use("/docs", docsRoutes);
 router.use("/ask", askRoutes);
 
-// Legacy endpoint for backwards compatibility
+// Legacy alias for backwards compatibility: /recommend -> movies router's
+// /recommend handler. The rewritten path must be relative to the movies
+// router (it owns "/recommend", not "/movies/recommend").
 router.get("/recommend", (req, res, next) => {
-  req.url =
-    "/movies/recommend" + (req.url.includes("?") ? req.url.substring(req.url.indexOf("?")) : "");
+  req.url = "/recommend" + (req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "");
   movieRoutes(req, res, next);
 });
 
