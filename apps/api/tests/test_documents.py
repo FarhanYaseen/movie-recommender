@@ -71,11 +71,13 @@ def test_upload_and_ingest_happy_path(client, user_a):
 def test_duplicate_upload_is_idempotent(client, user_a):
     headers = login(client, "alice@test.local")
     first = upload_and_ingest(client, headers, "notes.md", LONG_TEXT)
-    second = client.post(
+    response = client.post(
         "/api/documents",
         files={"file": ("renamed.md", LONG_TEXT.encode(), "text/plain")},
         headers=headers,
-    ).json()
+    )
+    assert response.status_code == 200  # contract: duplicates are 200, not 202
+    second = response.json()
     assert second["status"] == "duplicate"
     assert second["document_id"] == first["document_id"]
     documents = client.get("/api/documents", headers=headers).json()["data"]

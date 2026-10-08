@@ -2,7 +2,7 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, Form, UploadFile
+from fastapi import APIRouter, Depends, Form, Response, UploadFile
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -18,6 +18,7 @@ router = APIRouter(prefix="/api/documents", tags=["documents"])
 
 @router.post("", response_model=UploadResponse, status_code=202)
 async def upload_document(
+    response: Response,
     file: UploadFile,
     title: str | None = Form(default=None),
     user: User = Depends(get_current_user),
@@ -27,9 +28,12 @@ async def upload_document(
     source_name, text = validate_upload(file.filename, content)
     document, job, is_duplicate = create_document_with_job(db, user, source_name, title, text)
     db.commit()
+    if is_duplicate:
+        # Contract: idempotent duplicates return 200, not 202 (nothing was accepted)
+        response.status_code = 200
     return UploadResponse(
         document_id=document.id,
-        job_id=job.id if job else document.id,
+        job_id=job.id if job else None,
         status="duplicate" if is_duplicate else "pending",
     )
 

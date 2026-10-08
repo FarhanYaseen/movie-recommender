@@ -26,7 +26,7 @@ class LoginResponse(BaseModel):
 
 class UploadResponse(BaseModel):
     document_id: uuid.UUID
-    job_id: uuid.UUID
+    job_id: uuid.UUID | None
     status: Literal["pending", "duplicate"]
 
 
