@@ -1,0 +1,95 @@
+{
+  "provenance": "Synthetic fixtures written for this repository on 2026-10-08 (evals/fixtures/documents/). Labels were assigned by the fixture author at writing time; no production data involved.",
+  "queries": [
+    {
+      "query": "how does Inception use different clock speeds across dream levels",
+      "expected_document": "nolan-time-essay.md",
+      "expected_phrase": "tempo structure",
+      "in_scope": true
+    },
+    {
+      "query": "which scene shows years of missed video messages arriving at once",
+      "expected_document": "nolan-time-essay.md",
+      "expected_phrase": "backlog of video messages",
+      "in_scope": true
+    },
+    {
+      "query": "time as a budget in Nolan films",
+      "expected_document": "nolan-time-essay.md",
+      "expected_phrase": "they are budgets",
+      "in_scope": true
+    },
+    {
+      "query": "what does the staircase geometry mean in Parasite",
+      "expected_document": "korean-thrillers-notes.md",
+      "expected_phrase": "climb or a descent",
+      "in_scope": true
+    },
+    {
+      "query": "the smell motif and class in Parasite",
+      "expected_document": "korean-thrillers-notes.md",
+      "expected_phrase": "smell motif",
+      "in_scope": true
+    },
+    {
+      "query": "single take hammer fight in a corridor",
+      "expected_document": "korean-thrillers-notes.md",
+      "expected_phrase": "corridor fight with a hammer",
+      "in_scope": true
+    },
+    {
+      "query": "why was Dae-su imprisoned for fifteen years",
+      "expected_document": "korean-thrillers-notes.md",
+      "expected_phrase": "fifteen years of unexplained imprisonment",
+      "in_scope": true
+    },
+    {
+      "query": "falling in love with an operating system",
+      "expected_document": "ai-romance-watchlist.md",
+      "expected_phrase": "operating system",
+      "in_scope": true
+    },
+    {
+      "query": "clinic that erases painful memories while a couple hides inside them",
+      "expected_document": "ai-romance-watchlist.md",
+      "expected_phrase": "deletes painful memories",
+      "in_scope": true
+    },
+    {
+      "query": "learning an alien language changes how you experience time",
+      "expected_document": "ai-romance-watchlist.md",
+      "expected_phrase": "nonlinear experience of time",
+      "in_scope": true
+    },
+    {
+      "query": "collapsing beach house as an image of memory loss",
+      "expected_document": "ai-romance-watchlist.md",
+      "expected_phrase": "collapsing beach house",
+      "in_scope": true
+    },
+    {
+      "query": "relativity and the cost of an hour on Miller's planet",
+      "expected_document": "nolan-time-essay.md",
+      "expected_phrase": "seven years",
+      "in_scope": true
+    },
+    {
+      "query": "what is the best pizza restaurant in Naples",
+      "expected_document": null,
+      "expected_phrase": null,
+      "in_scope": false
+    },
+    {
+      "query": "how do I file my federal income taxes",
+      "expected_document": null,
+      "expected_phrase": null,
+      "in_scope": false
+    },
+    {
+      "query": "spaghetti westerns of the 1960s and Sergio Leone",
+      "expected_document": null,
+      "expected_phrase": null,
+      "in_scope": false
+    }
+  ]
+}

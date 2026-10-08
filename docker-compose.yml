@@ -1,22 +1,4 @@
 services:
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - VOYAGE_API_KEY=${VOYAGE_API_KEY}
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=movie_recommender
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-
   postgres:
     image: pgvector/pgvector:pg16
     ports:
@@ -32,6 +14,66 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  api:
+    build: ./apps/api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/movie_recommender
+      - JWT_SECRET=${JWT_SECRET:-dev-only-change-me}
+      - JWT_EXPIRES_MIN=60
+      - VOYAGE_API_KEY=${VOYAGE_API_KEY}
+      - VOYAGE_MODEL=voyage-3
+      - EMBEDDING_DIMENSIONS=1024
+      - EMBEDDING_RPM=${EMBEDDING_RPM:-3}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-opus-5-5}
+      - ENABLE_DEMO_SEED=${ENABLE_DEMO_SEED:-true}
+      - DEMO_USER_A_EMAIL=${DEMO_USER_A_EMAIL:-alice@example.com}
+      - DEMO_USER_A_PASSWORD=${DEMO_USER_A_PASSWORD:-alice-demo-password}
+      - DEMO_USER_B_EMAIL=${DEMO_USER_B_EMAIL:-bob@example.com}
+      - DEMO_USER_B_PASSWORD=${DEMO_USER_B_PASSWORD:-bob-demo-password}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./apps/web
+      args:
+        - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # Legacy Node sample API — optional, runs beside the new stack.
+  # Start with: docker compose --profile legacy up -d
+  legacy:
+    build: .
+    profiles: ["legacy"]
+    ports:
+      - "3100:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - VOYAGE_API_KEY=${VOYAGE_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-opus-5-5}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=movie_recommender
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
