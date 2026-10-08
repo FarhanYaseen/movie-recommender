@@ -1,6 +1,8 @@
 // src/services/movies.js
 // Movie business logic
 
+const crypto = require("crypto");
+
 const { pool } = require("../config/database");
 const { embedQuery, embedDocument } = require("./embedding");
 const { config } = require("../config");
@@ -43,12 +45,13 @@ async function findSimilarMovies(query, limit = config.recommendations.defaultLi
 
 async function createMovie({ title, genre, year, director, description }) {
   const embedding = await embedDocument(description);
+  const descriptionHash = crypto.createHash("sha256").update(description, "utf8").digest("hex");
 
   const { rows } = await pool.query(
-    `INSERT INTO movies (title, genre, year, director, description, embedding)
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO movies (title, genre, year, director, description, embedding, description_hash)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING id, title, genre, year, director, description, created_at`,
-    [title, genre, year, director, description, JSON.stringify(embedding)]
+    [title, genre, year, director, description, JSON.stringify(embedding), descriptionHash]
   );
 
   return rows[0];

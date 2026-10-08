@@ -4,7 +4,8 @@
 
 const { validateConfig } = require("../config");
 const { pool, setupDatabase, shutdown } = require("../config/database");
-const { embedDocument } = require("../services/embedding");
+const { embedDocuments } = require("../services/embedding");
+const { planSeed } = require("./seed-plan");
 
 const MOVIES = [
   {
@@ -129,12 +130,17 @@ const MOVIES = [
   },
 ];
 
-async function seedMovie(client, movie, index, total) {
-  const embedding = await embedDocument(movie.description);
-
+async function upsertMovie(client, movie, embedding) {
   await client.query(
-    `INSERT INTO movies (title, genre, year, director, description, embedding)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
+    `INSERT INTO movies (title, genre, year, director, description, embedding, description_hash)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     ON CONFLICT (title, year) DO UPDATE SET
+       genre = EXCLUDED.genre,
+       director = EXCLUDED.director,
+       description = EXCLUDED.description,
+       embedding = EXCLUDED.embedding,
+       description_hash = EXCLUDED.description_hash,
+       updated_at = NOW()`,
     [
       movie.title,
       movie.genre,
@@ -142,30 +148,56 @@ async function seedMovie(client, movie, index, total) {
       movie.director,
       movie.description,
       JSON.stringify(embedding),
+      movie.hash,
     ]
   );
-
-  console.log(`[seed] [${index + 1}/${total}] ${movie.title}`);
 }
 
 async function seed() {
+  const reset = process.argv.includes("--reset");
+
   try {
     validateConfig();
+
+    if (reset) {
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("--reset is a development-only flag and refuses to run in production");
+      }
+      console.log("[seed] --reset: deleting existing movies (development only)...");
+    }
+
     await setupDatabase();
 
     const client = await pool.connect();
     try {
-      const { rowCount } = await client.query("SELECT 1 FROM movies LIMIT 1");
-
-      if (rowCount > 0) {
-        console.log("[seed] Clearing existing movies...");
+      if (reset) {
         await client.query("DELETE FROM movies");
       }
 
-      console.log(`[seed] Seeding ${MOVIES.length} movies...\n`);
+      const { rows } = await client.query("SELECT title, year, description_hash FROM movies");
+      const { pending, unchanged } = planSeed(rows, MOVIES);
+      if (unchanged > 0) {
+        console.log(`[seed] ${unchanged} movies already up to date, skipping`);
+      }
+      if (pending.length === 0) {
+        console.log("[seed] Nothing to do. Run: npm start");
+        return;
+      }
 
-      for (let i = 0; i < MOVIES.length; i++) {
-        await seedMovie(client, MOVIES[i], i, MOVIES.length);
+      console.log(`[seed] Seeding ${pending.length} movies...\n`);
+
+      // One movie per upsert, but embeddings are requested in batches so a
+      // batch costs one rate-limited API call instead of one call per movie.
+      const BATCH_SIZE = 8;
+      let done = 0;
+      for (let start = 0; start < pending.length; start += BATCH_SIZE) {
+        const batch = pending.slice(start, start + BATCH_SIZE);
+        const embeddings = await embedDocuments(batch.map((movie) => movie.description));
+        for (let i = 0; i < batch.length; i++) {
+          await upsertMovie(client, batch[i], embeddings[i]);
+          done++;
+          console.log(`[seed] [${done}/${pending.length}] ${batch[i].title}`);
+        }
       }
 
       console.log(`\n[seed] Complete. Run: npm start`);

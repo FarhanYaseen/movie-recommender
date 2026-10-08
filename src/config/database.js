@@ -96,6 +96,17 @@ async function setupDatabase() {
       ON movies USING hnsw (embedding vector_cosine_ops)
     `);
 
+    // Stable identity for repeatable, non-destructive seeding (upserts), and
+    // a content hash so unchanged descriptions are not re-embedded
+    await client.query(`
+      ALTER TABLE movies ADD COLUMN IF NOT EXISTS description_hash TEXT
+    `);
+
+    await client.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS movies_title_year_key
+      ON movies (title, year)
+    `);
+
     console.log("[database] Migrations complete");
   } finally {
     client.release();
