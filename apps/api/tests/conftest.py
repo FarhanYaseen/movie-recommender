@@ -13,12 +13,14 @@ from pathlib import Path
 API_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(API_DIR))
 
-# The test database is derived from DATABASE_URL (CI provides postgres:postgres;
-# local default is the dev superuser). The database name is forced to end with
-# `_test` so the suite can never drop a real database.
-_BASE_URL = os.environ.get(
+# The test database is derived from TEST_DATABASE_URL (preferred) or
+# DATABASE_URL (CI provides postgres:postgres; local default is the dev
+# superuser). The database name is forced to end with `_test` so the suite can
+# never drop a real database.
+_BASE_URL = os.environ.get("TEST_DATABASE_URL") or os.environ.get(
     "DATABASE_URL", "postgresql://farhanyaseen@localhost:5432/movie_recommender_test"
 )
+print(f"[conftest] test database target: {_BASE_URL.rsplit('@', 1)[-1]}", flush=True)
 from urllib.parse import urlsplit, urlunsplit  # noqa: E402
 
 _parts = urlsplit(_BASE_URL)

@@ -41,6 +41,7 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/movie_recommender_test
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/movie_recommender_test
       JWT_SECRET: ci-test-secret
       # Provider keys intentionally absent: CI never makes paid API calls.
     steps:
@@ -51,7 +52,13 @@ jobs:
           cache: pip
           cache-dependency-path: apps/api/requirements.txt
       - run: pip install -r requirements.txt
-      - run: python -m pytest -q
+      - name: Show database env as Python sees it
+        run: python -c "import os; print({k: ('set' if os.environ.get(k) else 'MISSING') for k in ('DATABASE_URL', 'TEST_DATABASE_URL')})"
+      - name: Run tests
+        run: python -m pytest -q
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/movie_recommender_test
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/movie_recommender_test
 
   web:
     name: Next.js frontend — typecheck, tests, build
