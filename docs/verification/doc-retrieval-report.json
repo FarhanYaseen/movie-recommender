@@ -1,0 +1,120 @@
+{
+  "generated_at": "2026-10-08T18:40:10.360482+00:00",
+  "api_base": "http://localhost:8000",
+  "provenance": "Synthetic fixtures written for this repository on 2026-10-08 (evals/fixtures/documents/). Labels were assigned by the fixture author at writing time; no production data involved.",
+  "embedding_model": "voyage-3",
+  "sample_counts": {
+    "in_scope": 12,
+    "out_of_scope": 3,
+    "documents": 3
+  },
+  "timing_definition": "client-measured wall-clock per /api/search HTTP call (network + embedding + retrieval combined)",
+  "metrics": {
+    "recall_at_1": 0.9167,
+    "recall_at_4": 1.0,
+    "mrr": 0.9583
+  },
+  "in_scope_results": [
+    {
+      "query": "how does Inception use different clock speeds across dream levels",
+      "expected": "nolan-time-essay.md",
+      "rank": 1,
+      "top_score": 0.591,
+      "elapsed_ms": 1468.8
+    },
+    {
+      "query": "which scene shows years of missed video messages arriving at once",
+      "expected": "nolan-time-essay.md",
+      "rank": 1,
+      "top_score": 0.3463,
+      "elapsed_ms": 19282.7
+    },
+    {
+      "query": "time as a budget in Nolan films",
+      "expected": "nolan-time-essay.md",
+      "rank": 1,
+      "top_score": 0.6411,
+      "elapsed_ms": 20050.8
+    },
+    {
+      "query": "what does the staircase geometry mean in Parasite",
+      "expected": "korean-thrillers-notes.md",
+      "rank": 1,
+      "top_score": 0.3385,
+      "elapsed_ms": 40470.9
+    },
+    {
+      "query": "the smell motif and class in Parasite",
+      "expected": "korean-thrillers-notes.md",
+      "rank": 1,
+      "top_score": 0.4692,
+      "elapsed_ms": 20224.0
+    },
+    {
+      "query": "single take hammer fight in a corridor",
+      "expected": "korean-thrillers-notes.md",
+      "rank": 1,
+      "top_score": 0.2993,
+      "elapsed_ms": 19372.5
+    },
+    {
+      "query": "why was Dae-su imprisoned for fifteen years",
+      "expected": "korean-thrillers-notes.md",
+      "rank": 1,
+      "top_score": 0.2338,
+      "elapsed_ms": 40454.7
+    },
+    {
+      "query": "falling in love with an operating system",
+      "expected": "ai-romance-watchlist.md",
+      "rank": 1,
+      "top_score": 0.3353,
+      "elapsed_ms": 19972.6
+    },
+    {
+      "query": "clinic that erases painful memories while a couple hides inside them",
+      "expected": "ai-romance-watchlist.md",
+      "rank": 1,
+      "top_score": 0.4891,
+      "elapsed_ms": 19449.3
+    },
+    {
+      "query": "learning an alien language changes how you experience time",
+      "expected": "ai-romance-watchlist.md",
+      "rank": 1,
+      "top_score": 0.5026,
+      "elapsed_ms": 40036.2
+    },
+    {
+      "query": "collapsing beach house as an image of memory loss",
+      "expected": "ai-romance-watchlist.md",
+      "rank": 2,
+      "top_score": 0.4273,
+      "elapsed_ms": 19942.6
+    },
+    {
+      "query": "relativity and the cost of an hour on Miller's planet",
+      "expected": "nolan-time-essay.md",
+      "rank": 1,
+      "top_score": 0.4677,
+      "elapsed_ms": 20001.2
+    }
+  ],
+  "out_of_scope_results": [
+    {
+      "query": "what is the best pizza restaurant in Naples",
+      "top_score": 0.1777,
+      "elapsed_ms": 20577.9
+    },
+    {
+      "query": "how do I file my federal income taxes",
+      "top_score": 0.1289,
+      "elapsed_ms": 19524.6
+    },
+    {
+      "query": "spaghetti westerns of the 1960s and Sergio Leone",
+      "top_score": 0.2346,
+      "elapsed_ms": 20468.0
+    }
+  ]
+}

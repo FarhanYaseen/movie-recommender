@@ -216,6 +216,60 @@
       ]
     },
     {
+      "name": "Ask (RAG)",
+      "item": [
+        {
+          "name": "Ask a Question",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"a mind-bending thriller about memory\",\n  \"limit\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{apiVersion}}/ask",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiVersion}}", "ask"]
+            },
+            "description": "Retrieves similar movies via pgvector, then generates a grounded answer with Claude. Sources come from the retrieval result."
+          },
+          "response": []
+        },
+        {
+          "name": "Ask a Question (SSE Stream)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{apiVersion}}/ask?q=a mind-bending thriller about memory&stream=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiVersion}}", "ask"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "a mind-bending thriller about memory",
+                  "description": "The question in natural language"
+                },
+                {
+                  "key": "stream",
+                  "value": "true",
+                  "description": "Stream the answer as Server-Sent Events"
+                }
+              ]
+            },
+            "description": "SSE stream: 'sources' event first, then 'delta' events with text chunks, then 'done'."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Legacy Endpoints",
       "item": [
         {

@@ -17,6 +17,8 @@ tags:
     description: Health check endpoints
   - name: Movies
     description: Movie operations and recommendations
+  - name: Ask
+    description: Grounded question answering (RAG) over the movie catalog
 
 paths:
   /health:
@@ -183,6 +185,112 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /ask:
+    post:
+      tags:
+        - Ask
+      summary: Ask a question about movies (RAG)
+      description: >
+        Retrieves the most similar movies via pgvector, then generates a grounded
+        answer with Claude. Sources are attached programmatically from the
+        retrieval result, so citations are exact by construction. Set
+        `stream: true` to receive a Server-Sent Events stream instead of JSON
+        (events: `sources`, `delta`, `done`, `error`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskRequest"
+      responses:
+        "200":
+          description: Grounded answer (JSON mode) or SSE stream (stream mode)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AskResponse"
+            text/event-stream:
+              schema:
+                type: string
+                description: "SSE events: sources, delta, done, error"
+        "400":
+          description: Missing or invalid question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Upstream rate limit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Upstream answer generation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Answer generation not configured (missing ANTHROPIC_API_KEY)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      tags:
+        - Ask
+      summary: Ask a question about movies (browser-friendly variant)
+      description: Same as POST /ask; use `stream=true` to demo SSE directly in a browser.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 500
+          description: The question in natural language
+          example: a mind-bending thriller about memory
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 5
+          description: Number of movies to retrieve as context
+        - name: stream
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: Stream the answer as Server-Sent Events
+      responses:
+        "200":
+          description: Grounded answer (JSON mode) or SSE stream (stream mode)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AskResponse"
+            text/event-stream:
+              schema:
+                type: string
+                description: "SSE events: sources, delta, done, error"
+        "400":
+          description: Missing or invalid question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Answer generation not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     Movie:
@@ -270,6 +378,55 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/MovieWithSimilarity"
+
+    AskRequest:
+      type: object
+      required:
+        - question
+      properties:
+        question:
+          type: string
+          maxLength: 500
+          example: a mind-bending thriller about memory
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 5
+          description: Number of movies to retrieve as context
+        stream:
+          type: boolean
+          default: false
+          description: Stream the answer as Server-Sent Events
+
+    AskSource:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Inception
+        similarity:
+          type: string
+          description: Cosine similarity of this source to the question
+          example: "0.8612"
+
+    AskResponse:
+      type: object
+      properties:
+        question:
+          type: string
+          example: a mind-bending thriller about memory
+        answer:
+          type: string
+          example: "Eternal Sunshine of the Spotless Mind is the strongest match..."
+        sources:
+          type: array
+          description: Retrieved movies the answer is grounded in (attached programmatically)
+          items:
+            $ref: "#/components/schemas/AskSource"
+        model:
+          type: string
+          example: claude-opus-5-5
 
     ErrorResponse:
       type: object
