@@ -22,6 +22,9 @@ const config = {
     apiKey: process.env.VOYAGE_API_KEY,
     model: "voyage-3",
     dimensions: 1024,
+    requestsPerMinute: parseInt(process.env.EMBEDDING_RPM, 10) || 3,
+    timeoutMs: parseInt(process.env.EMBEDDING_TIMEOUT_MS, 10) || 30000,
+    maxRetries: parseInt(process.env.EMBEDDING_MAX_RETRIES, 10) || 3,
   },
 
   recommendations: {
