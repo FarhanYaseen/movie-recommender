@@ -20,7 +20,16 @@ sys.path.insert(0, str(API_DIR))
 _BASE_URL = os.environ.get("TEST_DATABASE_URL") or os.environ.get(
     "DATABASE_URL", "postgresql://farhanyaseen@localhost:5432/movie_recommender_test"
 )
-print(f"[conftest] test database target: {_BASE_URL.rsplit('@', 1)[-1]}", flush=True)
+_ENV_DIAG = {
+    key: ("set" if os.environ.get(key) else "missing")
+    for key in ("DATABASE_URL", "TEST_DATABASE_URL")
+}
+# sys.__stderr__ bypasses pytest's capture so this always reaches the CI log
+print(
+    f"[conftest] env={_ENV_DIAG} target={_BASE_URL.rsplit('@', 1)[-1]}",
+    file=sys.__stderr__,
+    flush=True,
+)
 from urllib.parse import urlsplit, urlunsplit  # noqa: E402
 
 _parts = urlsplit(_BASE_URL)
@@ -71,9 +80,15 @@ def fake_vector(text: str) -> list[float]:
 
 @pytest.fixture(scope="session", autouse=True)
 def test_database():
-    with psycopg.connect(ADMIN_DSN, autocommit=True) as conn:
-        conn.execute(f'DROP DATABASE IF EXISTS "{TEST_DB_NAME}"')
-        conn.execute(f'CREATE DATABASE "{TEST_DB_NAME}"')
+    try:
+        with psycopg.connect(ADMIN_DSN, autocommit=True) as conn:
+            conn.execute(f'DROP DATABASE IF EXISTS "{TEST_DB_NAME}"')
+            conn.execute(f'CREATE DATABASE "{TEST_DB_NAME}"')
+    except Exception as err:
+        raise RuntimeError(
+            f"admin connect failed: env={_ENV_DIAG} "
+            f"target={_BASE_URL.rsplit('@', 1)[-1]} admin={ADMIN_DSN.rsplit('@', 1)[-1]}"
+        ) from err
 
     # Recreate the legacy schema first so the migration is exercised as an
     # upgrade on top of the reviewed Node schema, not just a fresh install.
