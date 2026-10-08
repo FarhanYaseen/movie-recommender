@@ -65,7 +65,6 @@ from app.models import User  # noqa: E402
 from app.providers.base import GenerationProvider, ProviderTurn  # noqa: E402
 from app.routers.chat import get_provider  # noqa: E402
 
-ADMIN_DSN = "host=localhost user=farhanyaseen dbname=postgres"
 
 
 def fake_vector(text: str) -> list[float]:
