@@ -113,11 +113,22 @@ async function askQuestion(question, limit) {
   }
 }
 
+function streamAnswer(question, movies) {
+  const anthropic = getClient();
+  return anthropic.messages.stream({
+    model: config.anthropic.model,
+    max_tokens: config.ask.maxTokens,
+    system: SYSTEM_PROMPT,
+    messages: buildMessages(question, movies),
+  });
+}
+
 module.exports = {
   SYSTEM_PROMPT,
   isConfigured,
   retrieveContext,
   askQuestion,
+  streamAnswer,
   toSources,
   mapAnthropicError,
 };
