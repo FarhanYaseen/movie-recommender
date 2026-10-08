@@ -275,6 +275,52 @@
     const btn = document.getElementById('searchBtn');
     const resultsDiv = document.getElementById('results');
 
+    // Catalog values are untrusted data: build DOM nodes with textContent
+    // instead of interpolating strings into innerHTML.
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function renderMessage(className, message) {
+      const wrapper = el('div', className);
+      wrapper.appendChild(el('p', '', message));
+      resultsDiv.replaceChildren(wrapper);
+    }
+
+    function renderLoading() {
+      const wrapper = el('div', 'loading');
+      wrapper.appendChild(el('div', 'spinner'));
+      wrapper.appendChild(el('p', '', 'Searching...'));
+      resultsDiv.replaceChildren(wrapper);
+    }
+
+    function renderMovies(movies) {
+      const cards = [];
+      for (const movie of movies) {
+        const card = el('div', 'movie-card');
+
+        const header = el('div', 'movie-header');
+        header.appendChild(el('span', 'movie-title', String(movie.title ?? '')));
+        header.appendChild(
+          el('span', 'similarity-badge', `${(movie.similarity * 100).toFixed(0)}% match`)
+        );
+        card.appendChild(header);
+
+        const meta = el('div', 'movie-meta');
+        for (const value of [movie.year, movie.genre, movie.director]) {
+          meta.appendChild(el('span', '', String(value ?? '')));
+        }
+        card.appendChild(meta);
+
+        card.appendChild(el('p', 'movie-description', String(movie.description ?? '')));
+        cards.push(card);
+      }
+      resultsDiv.replaceChildren(...cards);
+    }
+
     input.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') search();
     });
@@ -284,60 +330,51 @@
       search();
     }
 
+    // Stale-response guard: each search aborts the previous request, and only
+    // the latest request may render (responses can arrive out of order).
+    let activeController = null;
+    let requestSeq = 0;
+
     async function search() {
       const query = input.value.trim();
       if (!query) return;
 
+      if (activeController) activeController.abort();
+      const controller = new AbortController();
+      activeController = controller;
+      const seq = ++requestSeq;
+
       btn.disabled = true;
       btn.textContent = 'Searching...';
-      resultsDiv.innerHTML = `
-        <div class="loading">
-          <div class="spinner"></div>
-          <p>Searching...</p>
-        </div>
-      `;
+      renderLoading();
 
       try {
-        const res = await fetch(`/api/v1/movies/recommend?q=${encodeURIComponent(query)}&limit=5`);
+        const res = await fetch(
+          `/api/v1/movies/recommend?q=${encodeURIComponent(query)}&limit=5`,
+          { signal: controller.signal }
+        );
         const data = await res.json();
+        if (seq !== requestSeq) return; // a newer search already took over
 
         if (!res.ok) {
           throw new Error(data.error?.message || 'Search failed');
         }
 
         if (data.data.length === 0) {
-          resultsDiv.innerHTML = `
-            <div class="empty-state">
-              <p>No matches found. Try a different description.</p>
-            </div>
-          `;
+          renderMessage('empty-state', 'No matches found. Try a different description.');
           return;
         }
 
-        resultsDiv.innerHTML = data.data.map(movie => `
-          <div class="movie-card">
-            <div class="movie-header">
-              <span class="movie-title">${movie.title}</span>
-              <span class="similarity-badge">${(movie.similarity * 100).toFixed(0)}% match</span>
-            </div>
-            <div class="movie-meta">
-              <span>${movie.year}</span>
-              <span>${movie.genre}</span>
-              <span>${movie.director}</span>
-            </div>
-            <p class="movie-description">${movie.description}</p>
-          </div>
-        `).join('');
-
+        renderMovies(data.data);
       } catch (err) {
-        resultsDiv.innerHTML = `
-          <div class="error">
-            <p>${err.message}</p>
-          </div>
-        `;
+        if (err.name === 'AbortError' || seq !== requestSeq) return; // superseded, say nothing
+        renderMessage('error', err.message);
       } finally {
-        btn.disabled = false;
-        btn.textContent = 'Search';
+        if (seq === requestSeq) {
+          btn.disabled = false;
+          btn.textContent = 'Search';
+          activeController = null;
+        }
       }
     }
   </script>
