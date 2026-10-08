@@ -13,15 +13,15 @@ work are marked ✓ below.
 - [x] `docs/contracts/ai-api.md` frozen (HTTP, SSE, auth, data, env, ports)
 - [x] Brief findings re-verified at HEAD (repeated `q` → 500 confirmed; legacy `/recommend` → 404 confirmed; NaN `limit` path confirmed; lint ✓ fixed; tests ✓ exist; placeholders ✓ fixed)
 
-## Workstream A — existing Node API reliability
+## Workstream A — existing Node API reliability (merged `ws-a-node-reliability`)
 - [x] Lint configuration (✓ done pre-branch)
-- [ ] Input validation before paid embedding calls (q single string ≤2000; limit 1..50; reject arrays/NaN; movie id positive int)
-- [ ] Legacy `/recommend` route fixed and tested against canonical route
-- [ ] Concurrency-safe configurable rate limiter; timeouts; bounded retries with jitter honoring Retry-After; no retry on auth/validation errors
-- [ ] Batch document-embedding method with index-correct mapping and dimension validation
-- [ ] Repeatable seeding: upserts on stable identifiers, resumable, no blanket delete; explicit dev-only reset flag
-- [ ] Legacy UI: safe rendering (no innerHTML of catalog data), stale-response guard, cancellation
-- [ ] Regression tests for all of the above
+- [x] Input validation before paid embedding calls (q single string ≤2000; limit 1..50; reject arrays/NaN; movie id positive int)
+- [x] Legacy `/recommend` route fixed and tested against canonical route
+- [x] Concurrency-safe configurable rate limiter; timeouts; bounded retries with jitter honoring Retry-After; no retry on auth/validation errors
+- [x] Batch document-embedding method (`embedDocuments`) with index-correct mapping and dimension validation
+- [x] Repeatable seeding: upserts on (title, year), description-hash skip of unchanged rows, resumable; `--reset` flag refused in production
+- [x] Legacy UI: textContent rendering, stale-response guard (sequence counter + AbortController), cancellation
+- [x] Regression tests (suite now 76 passing on the integration branch)
 
 ## Workstream B — FastAPI AI backend (`apps/api/`)
 - [ ] Alembic migrations (users, documents, chunks, jobs, conversations, messages); movies table preserved
