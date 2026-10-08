@@ -23,16 +23,17 @@ work are marked ✓ below.
 - [x] Legacy UI: textContent rendering, stale-response guard (sequence counter + AbortController), cancellation
 - [x] Regression tests (suite now 76 passing on the integration branch)
 
-## Workstream B — FastAPI AI backend (`apps/api/`)
-- [ ] Alembic migrations (users, documents, chunks, jobs, conversations, messages); movies table preserved
-- [ ] Auth: login, hashed credentials, expiring JWT, env-seeded demo users
-- [ ] TXT/MD ingestion: upload → job → deterministic chunking with offsets → batch embeddings → ready
-- [ ] PG-backed job state, single worker, resumable without duplicate chunks
-- [ ] Owner-scoped retrieval (`/api/search`) with SQL-level ownership filters
-- [ ] Grounded chat with SSE (meta/retrieval/delta/citations/done/error), insufficient-evidence path, citation validation
-- [ ] Agent mode: 3 allowlisted tools, schema validation, ≤3 rounds, budgets
-- [ ] Error shape + request IDs; health endpoints; no provider internals leaked
-- [ ] pytest suite: providers mocked; ownership and streaming covered
+## Workstream B — FastAPI AI backend (`apps/api/`) (merged)
+- [x] Alembic migrations (users, documents, chunks, jobs, conversations, messages); movies table preserved — upgrade path exercised on a legacy-style schema in tests and live
+- [x] Auth: login, bcrypt-hashed credentials, expiring JWT, env-seeded demo users
+- [x] TXT/MD ingestion: upload → job → deterministic chunking with offsets → batch embeddings → ready (verified live)
+- [x] PG-backed job state, single worker, resumable without duplicate chunks
+- [x] Owner-scoped retrieval (`/api/search`) with SQL-level ownership filters (verified live: 404 on foreign chunk, empty search, 400 on foreign document_ids)
+- [x] Grounded chat with SSE (meta/retrieval/delta/citations/done/error), insufficient-evidence path, citation validation (live stream verified through meta/retrieval; generation blocked by provider credits, fails safely with error + done(failed))
+- [x] Agent mode: 3 allowlisted tools, schema validation, ≤3 rounds, budgets (mock-verified)
+- [x] Error shape + request IDs; health endpoints; no provider internals leaked
+- [x] pytest suite: 39 passing; providers mocked; ownership and streaming covered
+- [x] Contract reconciliation: duplicate uploads 200 + null job_id (lead fix, test pinned)
 
 ## Workstream C — Next.js frontend (`apps/web/`) (merged)
 - [x] Login, documents/upload + job status, chat with RAG/agent toggle

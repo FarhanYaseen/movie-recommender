@@ -1,39 +1,61 @@
-# Movie Recommender API
+# Movie Recommender — AI RAG Application
 
-A semantic search engine for movies using vector embeddings. Instead of matching keywords, it understands what you're looking for — search for "films about dreams and reality" and it finds Inception, even though those words aren't in its description.
+A full AI application built around a movie catalog: multi-user document ingestion,
+semantic retrieval over pgvector, grounded streamed answers with exact citations, and a
+bounded tool-calling agent — plus the original semantic-search API preserved as a
+working legacy sample.
 
-Built with Node.js, PostgreSQL, pgvector, and Voyage AI.
-
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org/)
+[![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://python.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-blue.svg)](https://postgresql.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## What it does
+## What's in this repo
 
-- **Semantic search** — Understands meaning, not just keywords
-- **Vector similarity** — Uses cosine distance for accurate matching
-- **Fast queries** — HNSW indexing keeps searches under 10ms
-- **Production ready** — Health checks, graceful shutdown, structured logging
-- **Well documented** — OpenAPI spec, Postman collection, interactive docs
+| Path | What it is |
+|------|------------|
+| `apps/api/` | **FastAPI AI backend** — auth (JWT), TXT/Markdown ingestion with a resumable job worker, owner-scoped pgvector retrieval, grounded SSE chat with programmatic citations, bounded agent mode (3 allowlisted tools) |
+| `apps/web/` | **Next.js + TypeScript frontend** — login, document upload with live job progress, streamed cited answers, source inspection, tool-activity trail |
+| `src/` | **Legacy Node/Express sample** — the original semantic search + `/ask` RAG endpoint, kept working |
+| `evals/` | Retrieval evaluation: catalog golden queries (hit@k) and document fixtures with a live Recall@k/MRR runner |
+| `docs/` | OpenAPI spec, frozen API contracts, implementation status, verification reports |
+
+**The demo journey:** sign in → upload a Markdown document → watch ingestion progress →
+ask a question → get a streamed answer grounded in your documents with clickable source
+references → switch to agent mode and watch the model call catalog/document tools. A
+second user cannot see the first user's documents, jobs, conversations, or citations
+(enforced in SQL and verified by tests and live checks).
+
+## Demo journey quick start (Docker)
+
+```bash
+cp .env.example .env   # add VOYAGE_API_KEY and ANTHROPIC_API_KEY
+docker compose up -d --build
+# web: http://localhost:3000 · api: http://localhost:8000
+# demo logins: alice@example.com / alice-demo-password, bob@example.com / bob-demo-password
+```
+
+To also run the legacy Node sample: `docker compose --profile legacy up -d` (port 3100).
+
+Local development without Docker is documented in `apps/api/README.md` and
+`apps/web/README.md` (ports 8000 and 3000/3001, shared Postgres with pgvector).
 
 ---
 
-## Tech stack
+## Legacy sample: semantic search API
 
-| Component | Technology |
-|-----------|------------|
-| API Server | Node.js, Express |
-| Database | PostgreSQL with pgvector |
-| Embeddings | Voyage AI (voyage-3 model) |
-| Answer generation | Claude (Anthropic SDK), grounded + streamed |
-| Documentation | Swagger UI, OpenAPI 3.0 |
-| Deployment | Docker, Docker Compose |
+The original project — a semantic search engine for movies. Instead of matching
+keywords, it understands what you're looking for: search for "films about dreams and
+reality" and it finds Inception, even though those words aren't in its description.
 
----
+- **Semantic search** — meaning, not keywords, via Voyage AI embeddings
+- **Vector similarity** — pgvector cosine distance with an HNSW index
+- **Grounded answers** — `/ask` runs retrieval-augmented generation with Claude
+- **Foundations** — health checks, graceful shutdown, OpenAPI/Swagger, Postman collection
 
-## Quick start
+## Quick start (legacy sample)
 
 ### Using Docker
 
@@ -279,11 +301,31 @@ For production, set `NODE_ENV=production` and use strong passwords.
 
 ## Performance
 
-| Metric | Value |
-|--------|-------|
-| Query latency | ~200ms (includes embedding API call) |
-| Vector search | <10ms |
-| Embedding dimensions | 1024 |
+Embedding dimensions are 1024 (`voyage-3`). End-to-end query latency is dominated by the
+embedding API call. No benchmarked latency figures are published for this repo; the
+opt-in eval runner (`evals/run-doc-evals.py`) records client-measured per-query
+wall-clock times with its reports, with the measurement definition stated alongside.
+
+---
+
+## Limitations and deferred work
+
+Implemented and verified here: everything in "What's in this repo", backed by the test
+suites and `docs/verification/`. Known limitations of this delivery:
+
+- **Live answer generation requires Anthropic API credits.** The account key configured
+  during development had a zero credit balance, so generation paths (`/ask`, chat) are
+  verified against the real API up to the provider call, which fails safely
+  (`error` + `done(failed)` events). Retrieval, ingestion, auth, and isolation were
+  verified live. Add credits and the same flows produce answers unchanged.
+- The ingestion worker and embedding rate limiter are single-process (fine for the local
+  demo; not a distributed quota guarantee).
+- Auth uses expiring access tokens without refresh tokens; the web app keeps the token
+  in memory + sessionStorage (trade-off documented in `apps/web/README.md`).
+- TXT/Markdown ingestion only (PDF/OCR deferred). One embedding model per deployment;
+  changing models requires a reindex migration.
+- Deferred by scope: MCP, multi-agent orchestration, additional vector stores,
+  Kubernetes, fine-tuning.
 
 ---
 
