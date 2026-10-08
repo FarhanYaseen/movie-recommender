@@ -2,7 +2,7 @@
 // Database seeding script
 // Run with: npm run seed
 
-const { config, validateConfig } = require("../config");
+const { validateConfig } = require("../config");
 const { pool, setupDatabase, shutdown } = require("../config/database");
 const { embedDocument } = require("../services/embedding");
 
@@ -135,7 +135,14 @@ async function seedMovie(client, movie, index, total) {
   await client.query(
     `INSERT INTO movies (title, genre, year, director, description, embedding)
      VALUES ($1, $2, $3, $4, $5, $6)`,
-    [movie.title, movie.genre, movie.year, movie.director, movie.description, JSON.stringify(embedding)]
+    [
+      movie.title,
+      movie.genre,
+      movie.year,
+      movie.director,
+      movie.description,
+      JSON.stringify(embedding),
+    ]
   );
 
   console.log(`[seed] [${index + 1}/${total}] ${movie.title}`);

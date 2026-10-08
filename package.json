@@ -23,7 +23,9 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@eslint/js": "^8.57.1",
     "eslint": "^8.57.0",
+    "globals": "^17.13.0",
     "prettier": "^3.2.5"
   },
   "keywords": [
