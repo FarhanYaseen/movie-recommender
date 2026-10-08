@@ -13,7 +13,20 @@ from pathlib import Path
 API_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(API_DIR))
 
-TEST_DB_URL = "postgresql://farhanyaseen@localhost:5432/movie_recommender_test"
+# The test database is derived from DATABASE_URL (CI provides postgres:postgres;
+# local default is the dev superuser). The database name is forced to end with
+# `_test` so the suite can never drop a real database.
+_BASE_URL = os.environ.get(
+    "DATABASE_URL", "postgresql://farhanyaseen@localhost:5432/movie_recommender_test"
+)
+from urllib.parse import urlsplit, urlunsplit  # noqa: E402
+
+_parts = urlsplit(_BASE_URL)
+TEST_DB_NAME = (_parts.path.lstrip("/") or "movie_recommender") + (
+    "" if _parts.path.lstrip("/").endswith("_test") else "_test"
+)
+TEST_DB_URL = urlunsplit(_parts._replace(path=f"/{TEST_DB_NAME}"))
+ADMIN_DSN = urlunsplit(_parts._replace(path="/postgres"))
 
 os.environ.update(
     {
@@ -57,14 +70,12 @@ def fake_vector(text: str) -> list[float]:
 @pytest.fixture(scope="session", autouse=True)
 def test_database():
     with psycopg.connect(ADMIN_DSN, autocommit=True) as conn:
-        conn.execute("DROP DATABASE IF EXISTS movie_recommender_test")
-        conn.execute("CREATE DATABASE movie_recommender_test")
+        conn.execute(f'DROP DATABASE IF EXISTS "{TEST_DB_NAME}"')
+        conn.execute(f'CREATE DATABASE "{TEST_DB_NAME}"')
 
     # Recreate the legacy schema first so the migration is exercised as an
     # upgrade on top of the reviewed Node schema, not just a fresh install.
-    with psycopg.connect(
-        "host=localhost user=farhanyaseen dbname=movie_recommender_test", autocommit=True
-    ) as conn:
+    with psycopg.connect(TEST_DB_URL, autocommit=True) as conn:
         conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
         conn.execute(
             """
@@ -91,7 +102,7 @@ def test_database():
             )
 
     subprocess.run(
-        [str(API_DIR / ".venv" / "bin" / "alembic"), "upgrade", "head"],
+        [sys.executable, "-m", "alembic", "upgrade", "head"],
         cwd=API_DIR,
         env={**os.environ, "DATABASE_URL": TEST_DB_URL},
         check=True,
