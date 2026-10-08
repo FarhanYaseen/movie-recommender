@@ -14,7 +14,8 @@
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f app",
-    "docker:seed": "docker compose exec app node src/scripts/seed.js"
+    "docker:seed": "docker compose exec app node src/scripts/seed.js",
+    "test": "jest"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.132.1",
@@ -28,7 +29,9 @@
     "@eslint/js": "^8.57.1",
     "eslint": "^8.57.0",
     "globals": "^17.13.0",
-    "prettier": "^3.2.5"
+    "jest": "^30.5.2",
+    "prettier": "^3.2.5",
+    "supertest": "^7.3.1"
   },
   "keywords": [
     "pgvector",
@@ -55,5 +58,11 @@
   "type": "commonjs",
   "engines": {
     "node": ">=18.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
   }
 }
