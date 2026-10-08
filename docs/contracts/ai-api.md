@@ -57,8 +57,9 @@ Provider stack traces / raw provider bodies never reach the browser.
 
 - `POST /api/documents` — multipart: `file` (UTF-8 `.txt`/`.md`, ≤ `MAX_UPLOAD_BYTES`),
   optional `title` field. → `202 { "document_id": uuid, "job_id": uuid, "status": "pending" }`.
-  Re-uploading identical content (same SHA-256) for the same user returns the existing
-  document with `"status": "duplicate"` and its original ids (idempotent, no re-ingestion).
+  Re-uploading identical content (same SHA-256) for the same user returns **HTTP 200** with
+  the existing document's ids and `"status": "duplicate"` (idempotent, no re-ingestion;
+  clients treat any 2xx with `status: "duplicate"` as already-ingested and do not poll the job).
 - `GET /api/documents` → `{ "data": [ { "id", "title", "source_name", "status":
   "pending"|"processing"|"ready"|"failed", "chunk_count": int, "created_at" } ] }` (owner-scoped).
 - `GET /api/jobs/{job_id}` → `{ "id", "document_id", "status": "pending"|"processing"|
@@ -100,6 +101,15 @@ Insufficient evidence: when retrieval yields nothing usable, the server streams 
 explicit statement and `done.status = "insufficient_evidence"` — similarity scores are
 never presented as calibrated confidence. On client disconnect the provider stream is
 aborted. No automatic retry ever re-streams already-delivered text.
+
+## Clarifications recorded during Stage 1 (lead-approved)
+
+- Chunk `ordinal` is **0-based** everywhere (storage, search results, citations); UIs may
+  display `ordinal + 1`.
+- `meta.conversation_id` is always present (the server creates the conversation on first
+  message) and is what clients echo back on subsequent sends.
+- The `retrieval` event may be surfaced in UIs as a count; `citations` carries the
+  clickable sources.
 
 ## Agent mode tools (allowlisted, max `AGENT_MAX_TOOL_ROUNDS` rounds)
 

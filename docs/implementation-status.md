@@ -34,13 +34,13 @@ work are marked ✓ below.
 - [ ] Error shape + request IDs; health endpoints; no provider internals leaked
 - [ ] pytest suite: providers mocked; ownership and streaming covered
 
-## Workstream C — Next.js frontend (`apps/web/`)
-- [ ] Login, documents/upload + job status, chat with RAG/agent toggle
-- [ ] Streaming fetch SSE parser safe across chunk boundaries; stop + retry without duplicates
-- [ ] Source cards opening cited chunk text; tool activity display
-- [ ] Loading/empty/failed/insufficient-evidence/cancelled/completed states
-- [ ] Safe rendering (no untrusted HTML), keyboard accessible
-- [ ] Tests: SSE parsing, error states, cancellation
+## Workstream C — Next.js frontend (`apps/web/`) (merged)
+- [x] Login, documents/upload + job status, chat with RAG/agent toggle
+- [x] Streaming fetch SSE parser safe across chunk boundaries; stop + retry without duplicates
+- [x] Source cards opening cited chunk text; tool activity display
+- [x] Loading/empty/failed/insufficient-evidence/cancelled/completed states
+- [x] Safe rendering (no untrusted HTML), keyboard accessible
+- [x] Tests: SSE parsing, error states, cancellation (26 passing; tsc + production build clean)
 
 ## Workstream D — evaluation & proof (`evals/`, `tests/e2e/`, `docs/verification/`)
 - [x] Catalog retrieval evals (✓ hit@k harness pre-branch)
