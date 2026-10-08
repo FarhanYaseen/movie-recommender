@@ -28,3 +28,7 @@ build/
 # Python
 __pycache__/
 .venv/
+
+# Local agent files (not for GitHub)
+CLAUDE.md
+.claude/
