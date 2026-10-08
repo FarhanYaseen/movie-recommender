@@ -7,6 +7,36 @@ const { ValidationError, NotFoundError } = require("../middleware/errorHandler")
 
 const router = express.Router();
 
+const MAX_QUERY_LENGTH = 2000;
+const MAX_LIMIT = 50;
+
+// Validation happens before any paid embedding call. Express parses repeated
+// query parameters (?q=a&q=b) into arrays, so the type check matters.
+function validateQuery(raw) {
+  if (typeof raw !== "string" || !raw.trim()) {
+    throw new ValidationError("Query parameter 'q' must be a single non-empty string");
+  }
+  const query = raw.trim();
+  if (query.length > MAX_QUERY_LENGTH) {
+    throw new ValidationError(`Query parameter 'q' must be at most ${MAX_QUERY_LENGTH} characters`);
+  }
+  return query;
+}
+
+function validateLimit(raw) {
+  if (raw === undefined) {
+    return undefined; // service applies the default (5)
+  }
+  if (typeof raw !== "string" || !/^\d+$/.test(raw)) {
+    throw new ValidationError(`Query parameter 'limit' must be an integer between 1 and ${MAX_LIMIT}`);
+  }
+  const limit = parseInt(raw, 10);
+  if (limit < 1 || limit > MAX_LIMIT) {
+    throw new ValidationError(`Query parameter 'limit' must be an integer between 1 and ${MAX_LIMIT}`);
+  }
+  return limit;
+}
+
 // GET /movies - List all movies
 router.get("/", async (_req, res, next) => {
   try {
@@ -24,17 +54,13 @@ router.get("/", async (_req, res, next) => {
 // IMPORTANT: Must be before /:id route to avoid "recommend" being parsed as an ID
 router.get("/recommend", async (req, res, next) => {
   try {
-    const { q: query, limit } = req.query;
+    const query = validateQuery(req.query.q);
+    const limit = validateLimit(req.query.limit);
 
-    if (!query?.trim()) {
-      throw new ValidationError("Query parameter 'q' is required");
-    }
-
-    const parsedLimit = limit ? parseInt(limit, 10) : undefined;
-    const results = await movieService.findSimilarMovies(query.trim(), parsedLimit);
+    const results = await movieService.findSimilarMovies(query, limit);
 
     res.json({
-      query: query.trim(),
+      query,
       count: results.length,
       data: results,
     });
@@ -46,9 +72,12 @@ router.get("/recommend", async (req, res, next) => {
 // GET /movies/:id - Get movie by ID
 router.get("/:id", async (req, res, next) => {
   try {
+    if (!/^\d+$/.test(req.params.id)) {
+      throw new ValidationError("Movie ID must be a positive integer");
+    }
     const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) {
-      throw new ValidationError("Invalid movie ID");
+    if (id < 1) {
+      throw new ValidationError("Movie ID must be a positive integer");
     }
 
     const movie = await movieService.getMovieById(id);
