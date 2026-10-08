@@ -41,22 +41,25 @@ Branch: `feat/ai-rag-app` · Brief baseline: `596c93b` · Date: 2026-10-08
 
 1. **Anthropic credits** — required for any live generation (legacy `/ask`, chat RAG and
    agent modes). Everything up to the provider call is verified.
-2. **Embedding-failure mapping bug (backend)**: when Voyage retries are exhausted
-   mid-search, the API returns 500 `INTERNAL_ERROR`; contract says upstream failures are
-   502 `UPSTREAM_ERROR`. Reproduce by exceeding the free-tier RPM; fix in the embedding
-   service error mapping in `apps/api`.
+2. ~~Embedding-failure mapping bug~~ **Fixed**: the live failure was a transient DNS
+   `httpx.ConnectError` escaping the Voyage client uncaught. Network errors are now
+   retried like timeouts and exhaust to 502 `UPSTREAM_ERROR`; covered by
+   `apps/api/tests/test_embedding_client.py` (backend suite 43/43).
 3. ~~Compose live run~~ **Verified 2026-10-08**: `docker compose up --build` (ports
    shifted via an override file to avoid local services) built and started all three
    services; postgres healthy, `/health/ready` → ready, web served, demo login returned
    a token. Stack torn down after verification.
-4. Full live eval report JSON pending the quiet re-run in item 3's environment.
+4. ~~Full live eval~~ **Done** (quiet re-run, 2026-10-08): Recall@1 0.92, Recall@4
+   1.00, MRR 0.958 over 12 in-scope queries; out-of-scope top scores 0.129–0.235.
+   Report: `doc-retrieval-report.json` in this directory. Duplicate-upload idempotency
+   also exercised live via the HTTP 200 path.
 
 ## Case-study guidance (truthful claims)
 
 The existing case study remains accurate. Once Compose verification and credits land,
-these claims become supportable and may be added: multi-user document RAG with
-owner-scoped retrieval verified by tests and live checks; streamed SSE answers with
-programmatically validated citations; bounded 3-tool agent mode (mock-verified); jest
-76 / pytest 39 / vitest 26 green; document retrieval ranked the expected source #1 in
-5/5 live-sampled queries (partial run — full metrics pending). Do **not** claim live
-generation, latency figures, or a deployed demo until verified.
+these claims are now supportable: multi-user document RAG with owner-scoped retrieval
+verified by tests and live checks; streamed SSE answers with programmatically validated
+citations; bounded 3-tool agent mode (mock-verified); jest 76 / pytest 43 / vitest 26
+green; live document retrieval Recall@1 0.92 / Recall@4 1.00 / MRR 0.958 on a labeled
+fixture set; Compose stack verified end to end. Do **not** claim live generation,
+latency figures, or a deployed demo until verified (generation awaits API credits).

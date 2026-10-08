@@ -259,6 +259,24 @@ Current scores on the seed catalog:
 [evals] PASS: hit@5 1.00 >= threshold 0.8
 ```
 
+### Document retrieval (AI backend)
+
+The document pipeline has its own labeled set: 12 in-scope questions over synthetic
+fixture documents (provenance recorded in `evals/doc-golden-queries.json`) plus 3
+out-of-scope questions. The opt-in live runner (`RUN_LIVE_EVALS=true python3
+evals/run-doc-evals.py`) uploads the fixtures, waits for ingestion, and measures
+document-level ranking through the real `/api/search` endpoint.
+
+Live results (2026-10-08, full report in `docs/verification/doc-retrieval-report.json`):
+
+```
+[doc-evals] Recall@1: 0.92  Recall@4: 1.00  MRR: 0.958  (12 in-scope queries)
+[doc-evals] Out-of-scope top scores: 0.178, 0.129, 0.235
+```
+
+Out-of-scope questions score well below in-scope ones (≤0.24 vs mostly ≥0.5), which is
+the separation the chat endpoint's insufficient-evidence floor relies on.
+
 ---
 
 ## Testing
