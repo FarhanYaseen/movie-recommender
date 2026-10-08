@@ -13,8 +13,8 @@
     "format": "prettier --write src/",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f app",
-    "docker:seed": "docker compose exec app node src/scripts/seed.js",
+    "docker:logs": "docker compose logs -f api web",
+    "docker:seed": "docker compose --profile legacy exec legacy node src/scripts/seed.js",
     "test": "jest"
   },
   "dependencies": {
