@@ -45,9 +45,10 @@ Branch: `feat/ai-rag-app` · Brief baseline: `596c93b` · Date: 2026-10-08
    mid-search, the API returns 500 `INTERNAL_ERROR`; contract says upstream failures are
    502 `UPSTREAM_ERROR`. Reproduce by exceeding the free-tier RPM; fix in the embedding
    service error mapping in `apps/api`.
-3. **Compose live run** — the full `docker compose up --build` verification was started
-   (daemon available) but had not completed when work stopped; `docker compose config`
-   is validated. Re-run per `docs/verification/demo-checklist.md`.
+3. ~~Compose live run~~ **Verified 2026-10-08**: `docker compose up --build` (ports
+   shifted via an override file to avoid local services) built and started all three
+   services; postgres healthy, `/health/ready` → ready, web served, demo login returned
+   a token. Stack torn down after verification.
 4. Full live eval report JSON pending the quiet re-run in item 3's environment.
 
 ## Case-study guidance (truthful claims)
