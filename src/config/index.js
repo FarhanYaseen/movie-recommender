@@ -28,14 +28,29 @@ const config = {
     defaultLimit: 5,
     maxLimit: 50,
   },
+
+  anthropic: {
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    model: process.env.ANTHROPIC_MODEL || "claude-opus-5-5",
+  },
+
+  ask: {
+    defaultLimit: 5,
+    maxLimit: 10,
+    maxQuestionLength: 500,
+    maxTokens: 1024,
+  },
 };
 
 function validateConfig() {
-  const required = ["embedding.apiKey", "db.password"];
   const missing = [];
 
-  if (!config.embedding.apiKey) missing.push("VOYAGE_API_KEY");
-  if (!config.db.password && config.env === "production") missing.push("DB_PASSWORD");
+  if (!config.embedding.apiKey) {
+    missing.push("VOYAGE_API_KEY");
+  }
+  if (!config.db.password && config.env === "production") {
+    missing.push("DB_PASSWORD");
+  }
 
   if (missing.length > 0) {
     throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
