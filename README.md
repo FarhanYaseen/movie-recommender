@@ -37,7 +37,7 @@ Built with Node.js, PostgreSQL, pgvector, and Voyage AI.
 ### Using Docker
 
 ```bash
-git clone https://github.com/yourusername/movie-recommender.git
+git clone https://github.com/FarhanYaseen/movie-recommender.git
 cd movie-recommender
 
 # Add your API key
