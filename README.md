@@ -162,6 +162,20 @@ Requires `ANTHROPIC_API_KEY`; without it, `/ask` returns 503 while every other e
 
 ## How it works
 
+```mermaid
+flowchart LR
+    Client([Client]) --> API[Express API]
+    API -->|embed query| Voyage[Voyage AI<br/>1024-dim vector]
+    Voyage --> PG[(PostgreSQL<br/>pgvector + HNSW)]
+    PG -->|top-K movies| Claude[Claude<br/>grounded answer]
+    Claude -->|SSE stream| Client
+    PG -.->|/movies/recommend<br/>retrieval only| Client
+```
+
+### From semantic search to RAG
+
+Retrieval (`/movies/recommend`) and generation (`/ask`) are two halves of the same pipeline. Retrieval embeds the query and finds the nearest movies in vector space — that alone is a useful search engine. RAG goes one step further: those retrieved movies become the context for a language model, which writes an answer grounded strictly in them. Because the model only sees movies that retrieval returned, the `sources` array can be attached from the retrieval result itself — no risk of the model citing something it never saw.
+
 The system converts text into 1024-dimensional vectors using Voyage AI's embedding model. Similar concepts end up close together in this vector space.
 
 ```
@@ -188,8 +202,15 @@ src/
 ├── config/           # Environment and database setup
 ├── middleware/       # Error handling, request logging
 ├── routes/           # API endpoints
-├── services/         # Business logic, embedding calls
+├── services/         # Business logic, embedding + Claude calls
 └── scripts/          # Database seeding
+
+evals/
+├── golden-queries.json   # Golden retrieval queries with expected titles
+└── run-evals.js          # hit@k evaluation harness
+
+tests/
+└── api.test.js       # API tests with mocked providers
 
 docs/
 ├── openapi.yaml      # API specification
@@ -215,6 +236,16 @@ Current scores on the seed catalog:
 [evals] hit@1: 1.00  hit@3: 1.00  hit@5: 1.00  mean top similarity: 0.6159  (15 queries)
 [evals] PASS: hit@5 1.00 >= threshold 0.8
 ```
+
+---
+
+## Testing
+
+```bash
+npm test
+```
+
+Tests run without network access, a database, or API keys: the embedding service, the database pool, and the Anthropic client are all mocked. They cover validation errors, the 503 degradation when `ANTHROPIC_API_KEY` is unset, and the happy paths for `/movies/recommend` and `/ask`.
 
 ---
 

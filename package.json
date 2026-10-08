@@ -1,7 +1,7 @@
 {
   "name": "movie-recommender",
   "version": "1.0.0",
-  "description": "Semantic movie recommender using pgvector + Anthropic embeddings",
+  "description": "Semantic movie recommender with grounded RAG answers \u2014 pgvector + Voyage AI embeddings + Claude",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -43,18 +43,22 @@
     "recommendation-engine",
     "nodejs",
     "postgresql",
-    "voyage-ai"
+    "voyage-ai",
+    "rag",
+    "anthropic",
+    "claude",
+    "sse"
   ],
-  "author": "Your Name <your.email@example.com> (https://yourportfolio.com)",
+  "author": "Farhan Yaseen <farhan.yaseen.se@gmail.com> (https://farhanyaseen.netlify.app/)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/movie-recommender.git"
+    "url": "https://github.com/FarhanYaseen/movie-recommender.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/movie-recommender/issues"
+    "url": "https://github.com/FarhanYaseen/movie-recommender/issues"
   },
-  "homepage": "https://github.com/yourusername/movie-recommender#readme",
+  "homepage": "https://github.com/FarhanYaseen/movie-recommender#readme",
   "type": "commonjs",
   "engines": {
     "node": ">=18.0.0"
