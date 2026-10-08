@@ -88,6 +88,13 @@ def embed_texts(texts: list[str], input_type: str) -> list[list[float]]:
                 time.sleep(_retry_delay(attempt, None))
                 continue
             raise last_error from err
+        except httpx.HTTPError as err:
+            # Connection/DNS/protocol failures are transient — retry, then 502
+            last_error = UpstreamError("Embedding provider is unreachable")
+            if attempt < MAX_RETRIES:
+                time.sleep(_retry_delay(attempt, None))
+                continue
+            raise last_error from err
 
         if response.status_code == 200:
             payload = response.json()
