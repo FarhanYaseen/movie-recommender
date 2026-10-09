@@ -5,6 +5,7 @@ semantic retrieval over pgvector, grounded streamed answers with exact citations
 bounded tool-calling agent — plus the original semantic-search API preserved as a
 working legacy sample.
 
+[![CI](https://github.com/FarhanYaseen/movie-recommender/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/FarhanYaseen/movie-recommender/actions/workflows/ci.yml)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://python.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-blue.svg)](https://postgresql.org/)
@@ -331,11 +332,11 @@ wall-clock times with its reports, with the measurement definition stated alongs
 Implemented and verified here: everything in "What's in this repo", backed by the test
 suites and `docs/verification/`. Known limitations of this delivery:
 
-- **Live answer generation requires Anthropic API credits.** The account key configured
-  during development had a zero credit balance, so generation paths (`/ask`, chat) are
-  verified against the real API up to the provider call, which fails safely
-  (`error` + `done(failed)` events). Retrieval, ingestion, auth, and isolation were
-  verified live. Add credits and the same flows produce answers unchanged.
+- **Live answer generation requires an Anthropic API key with credits.** With a funded
+  key, all generation paths (`/ask`, RAG chat, agent mode) are verified live end to end
+  (see `docs/verification/final-report.md`); with an unfunded key they fail safely
+  (`error` + `done(failed)` events) while retrieval, ingestion, auth, and isolation
+  keep working.
 - The ingestion worker and embedding rate limiter are single-process (fine for the local
   demo; not a distributed quota guarantee).
 - Auth uses expiring access tokens without refresh tokens; the web app keeps the token

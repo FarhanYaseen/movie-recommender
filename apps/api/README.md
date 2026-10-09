@@ -17,9 +17,7 @@ python3 -m venv .venv
 # then create the schema (the legacy movies table is left untouched):
 DATABASE_URL=postgresql://USER@localhost:5432/movie_recommender .venv/bin/alembic upgrade head
 
-DATABASE_URL=postgresql://USER@localhost:5432/movie_recommender \
-ENABLE_DEMO_SEED=true DEMO_USER_A_PASSWORD=... DEMO_USER_B_PASSWORD=... \
-VOYAGE_API_KEY=... ANTHROPIC_API_KEY=... JWT_SECRET=$(openssl rand -hex 32) \
+cp .env.example .env   # then fill in keys; the repo-root .env is also read
 .venv/bin/uvicorn app.main:app --port 8000
 ```
 

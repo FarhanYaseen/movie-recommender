@@ -13,13 +13,18 @@ Any change must be recorded here **before** frontend integration.
 | Next.js frontend | 3000 | `web` | Dev fallback 3001 when legacy Node API occupies 3000 |
 | Legacy Node API | 3100 | `legacy` (optional profile) | Kept as a working sample; not required for the demo journey |
 
-Backend env (see `.env.example`): `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_MIN` (60),
-`VOYAGE_API_KEY`, `VOYAGE_MODEL` (voyage-3), `EMBEDDING_DIMENSIONS` (1024), `EMBEDDING_RPM` (3),
-`EMBEDDING_TIMEOUT_S` (30), `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (claude-opus-5-5),
-`CHUNK_SIZE` (800), `CHUNK_OVERLAP` (150), `MAX_UPLOAD_BYTES` (2097152),
-`AGENT_MAX_TOOL_ROUNDS` (3), `CHAT_MAX_OUTPUT_TOKENS` (1024), `CHAT_TIMEOUT_S` (120),
-`USER_DAILY_MESSAGE_LIMIT` (200), `ENABLE_DEMO_SEED`,
-`DEMO_USER_A_EMAIL`/`DEMO_USER_A_PASSWORD`, `DEMO_USER_B_EMAIL`/`DEMO_USER_B_PASSWORD`.
+Backend env — canonical reference: **`apps/api/.env.example`** (the backend reads
+`apps/api/.env` and the repo-root `.env`, local file winning; real env vars override
+both). Required: `DATABASE_URL`, `JWT_SECRET` (insecure default refused when
+`APP_ENV=production`), `VOYAGE_API_KEY`, `ANTHROPIC_API_KEY`, and the
+`ENABLE_DEMO_SEED`/`DEMO_USER_*` values for demo logins. Optional with defaults:
+`JWT_EXPIRES_MIN` (60), `VOYAGE_MODEL` (voyage-3), `EMBEDDING_DIMENSIONS` (1024),
+`EMBEDDING_RPM` (3), `EMBEDDING_TIMEOUT_S` (30), `EMBEDDING_BATCH_SIZE` (32),
+`ANTHROPIC_MODEL` (claude-opus-5-5), `CHUNK_SIZE` (800), `CHUNK_OVERLAP` (150),
+`MAX_UPLOAD_BYTES` (2097152), `AGENT_MAX_TOOL_ROUNDS` (3), `CHAT_MAX_OUTPUT_TOKENS`
+(1024), `CHAT_TIMEOUT_S` (120), `USER_DAILY_MESSAGE_LIMIT` (200), `RETRIEVAL_TOP_K`
+(8), `RETRIEVAL_SIMILARITY_FLOOR` (0.25), `HISTORY_MAX_MESSAGES` (20),
+`WORKER_ENABLED` (true), `WORKER_POLL_INTERVAL_S` (1.0), `APP_ENV` (development).
 
 Frontend env: `NEXT_PUBLIC_API_BASE_URL` (default `http://localhost:8000`).
 

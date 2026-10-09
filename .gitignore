@@ -32,3 +32,4 @@ __pycache__/
 # Local agent files (not for GitHub)
 CLAUDE.md
 .claude/
+UPGRADE-PLAN.md
