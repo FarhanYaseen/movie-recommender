@@ -2,16 +2,28 @@
 # Centralized settings, read from environment (names frozen in docs/contracts/ai-api.md)
 
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+_API_DIR = Path(__file__).resolve().parents[1]
+_REPO_ROOT = _API_DIR.parents[1]
+
+INSECURE_JWT_DEFAULT = "dev-only-secret-change-me"
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    # Both env files are read regardless of the working directory; the
+    # app-local file overrides the repo-root one, and real environment
+    # variables override both.
+    model_config = SettingsConfigDict(
+        env_file=(_REPO_ROOT / ".env", _API_DIR / ".env"), extra="ignore"
+    )
 
-    database_url: str = "postgresql+psycopg://farhanyaseen@localhost:5432/movie_recommender"
+    app_env: str = "development"
+    database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/movie_recommender"
 
-    jwt_secret: str = "dev-only-secret-change-me"
+    jwt_secret: str = INSECURE_JWT_DEFAULT
     jwt_expires_min: int = 60
 
     voyage_api_key: str = ""

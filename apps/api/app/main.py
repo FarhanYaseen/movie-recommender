@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .auth import seed_demo_users
-from .config import get_settings
+from .config import INSECURE_JWT_DEFAULT, get_settings
 from .db import get_session_factory
 from .middleware.request_context import RequestIdMiddleware, install_error_handlers
 from .routers import auth, chat, documents, health, jobs, search
@@ -22,6 +22,13 @@ logger = logging.getLogger("api")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
+    if settings.jwt_secret == INSECURE_JWT_DEFAULT:
+        if settings.app_env == "production":
+            raise RuntimeError(
+                "JWT_SECRET is the insecure default; set a real secret before "
+                "running with APP_ENV=production (openssl rand -hex 32)"
+            )
+        logger.warning("JWT_SECRET is the insecure dev default — fine locally, never in production")
     try:
         with get_session_factory()() as db:
             seed_demo_users(db)
